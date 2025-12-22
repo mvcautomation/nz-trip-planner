@@ -70,19 +70,15 @@ export default function HeroSection() {
             <div
               className="hero__bg"
               style={{
-                backgroundImage: `url('https://images.unsplash.com/photo-1469521669194-babb45599def?w=1920&q=80')`,
+                backgroundImage: `url('https://assets.codepen.io/204808/hobbiton.jpg')`,
               }}
             />
-            <h1 className="hero__title">
-              New Zealand
-              <br />
-              <span className="text-blue-400">Adventure 2025</span>
-            </h1>
+            <h1 className="hero__title">Hobbiton</h1>
           </div>
           <div className="hero__cover">
             <img
               className="hero__cover-img"
-              src="https://images.unsplash.com/photo-1578271887552-5ac3a72752bc?w=1920&q=80"
+              src="https://assets.codepen.io/204808/hobbit-hole.png"
               alt="Hobbit hole door"
             />
           </div>

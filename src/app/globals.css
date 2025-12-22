@@ -49,28 +49,27 @@ body {
   background-position: center center;
   background-repeat: no-repeat;
   background-size: cover;
-  filter: blur(3px) brightness(1.3);
+  filter: blur(3px) brightness(1.5);
   height: 100vh;
   width: 100%;
   will-change: filter;
 }
 
 .hero__title {
-  color: var(--white);
+  color: #1f1f1f;
   filter: blur(10px);
-  font-size: clamp(2rem, 10vw, 5rem);
-  line-height: 1.1;
+  font-size: clamp(3.125rem, 17.321vw + -1.357rem, 12.5rem);
+  line-height: clamp(4.688rem, 21.363vw + -0.84rem, 16.25rem);
   font-weight: 700;
   left: 50%;
   margin: 0;
   opacity: 0;
-  padding: 0 1rem;
+  padding: 0;
   position: absolute;
   text-align: center;
   top: 50vh;
   transform: translate(-50%, -50%) scale(0.5);
   z-index: 100;
-  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
 }
 
 .hero__cover {
@@ -89,7 +88,7 @@ body {
   background: radial-gradient(
     circle,
     rgba(0, 0, 0, 0) 20%,
-    rgba(0, 0, 0, 0.8) 90%
+    rgba(0, 0, 0, 1) 90%
   );
   content: "";
   inset: 0;
