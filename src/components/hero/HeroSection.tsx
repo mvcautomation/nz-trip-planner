@@ -49,8 +49,6 @@ export default function HeroSection() {
           '.hero__title',
           {
             scale: 1,
-            xPercent: -50,
-            yPercent: -50,
             opacity: 1,
             filter: 'blur(0px)',
             ease: 'power1.inOut',

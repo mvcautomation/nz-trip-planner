@@ -85,6 +85,7 @@ body {
   text-align: center;
   top: 50vh;
   transform: translate(-50%, -50%) scale(0.5);
+  /* GSAP will animate to scale(1) while keeping translate(-50%, -50%) */
   z-index: 100;
   width: 95%;
   max-width: 800px;
@@ -99,9 +100,9 @@ body {
   color: #fef3c7;
   font-family: 'Georgia', 'Times New Roman', serif;
   text-transform: uppercase;
-  letter-spacing: 0.35em;
+  letter-spacing: 0.2em;
   font-weight: 300;
-  font-size: clamp(3.5rem, 14vw, 6rem);
+  font-size: clamp(3rem, 12vw, 5.5rem);
   line-height: 1.2;
   text-shadow:
     0 2px 20px rgba(0, 0, 0, 0.9),
@@ -112,16 +113,16 @@ body {
 .hero__title-line--accent {
   font-style: italic;
   font-weight: 400;
-  font-size: clamp(2rem, 8vw, 3.5rem);
-  letter-spacing: 0.5em;
+  font-size: clamp(1.75rem, 7vw, 3rem);
+  letter-spacing: 0.3em;
   color: #fcd34d;
   margin-top: 0.25rem;
 }
 
 .hero__title-line--year {
   font-weight: 200;
-  font-size: clamp(1.25rem, 5vw, 2rem);
-  letter-spacing: 0.8em;
+  font-size: clamp(1.1rem, 4.5vw, 1.75rem);
+  letter-spacing: 0.5em;
   color: rgba(254, 243, 199, 0.7);
   margin-top: 0.75rem;
   border-top: 1px solid rgba(254, 243, 199, 0.3);
