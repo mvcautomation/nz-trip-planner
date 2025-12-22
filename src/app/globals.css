@@ -320,7 +320,18 @@ body {
   left: 0;
   right: 0;
   z-index: 1000;
-  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Extend background below safe area to prevent gap when iOS browser chrome hides */
+.bottom-nav-container::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: env(safe-area-inset-bottom, 0px);
+  background: var(--brown-dark);
+  z-index: -1;
 }
 
 /* Wave */
@@ -411,9 +422,9 @@ body {
   transform: scale(1);
 }
 
-/* Safe area for mobile */
+/* Safe area for mobile - nav is 103px (wave 33px + list 70px) plus safe area */
 .safe-bottom {
-  padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+  padding-bottom: calc(110px + env(safe-area-inset-bottom));
 }
 
 /* Drag and drop styles */
