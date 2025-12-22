@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#1a1a1a"/>
+  <circle cx="256" cy="200" r="100" fill="#2563eb"/>
+  <path d="M256 340 L156 460 L356 460 Z" fill="#16a34a"/>
+  <text x="256" y="230" text-anchor="middle" fill="white" font-family="Arial" font-size="80" font-weight="bold">NZ</text>
+</svg>
