@@ -50,6 +50,10 @@ function PlannerContent() {
   const [customActivities, setCustomActivities] = useState<CustomActivity[]>([]);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const dragOrderRef = useRef<string[]>([]);
+  const touchStartY = useRef<number>(0);
+  const touchCurrentY = useRef<number>(0);
+  const draggedElement = useRef<HTMLDivElement | null>(null);
+  const listContainerRef = useRef<HTMLDivElement>(null);
 
   const tripDays = getTripDays();
   const possibleActivities = getPossibleActivities();
@@ -248,7 +252,7 @@ function PlannerContent() {
 
   const estimatedTimes = getEstimatedTimes();
 
-  // Drag handlers
+  // Drag handlers (mouse)
   const handleDragStart = (index: number) => {
     setDraggedIndex(index);
     dragOrderRef.current = [...orderedActivities];
@@ -268,6 +272,77 @@ function PlannerContent() {
 
   const handleDragEnd = async () => {
     setDraggedIndex(null);
+    // Save using the ref which has the latest order
+    if (selectedDate && dragOrderRef.current.length > 0) {
+      await setDayPlan({
+        date: selectedDate,
+        orderedActivities: dragOrderRef.current,
+        departureTime,
+      });
+    }
+  };
+
+  // Touch handlers (mobile)
+  const handleTouchStart = (e: React.TouchEvent, index: number) => {
+    const touch = e.touches[0];
+    touchStartY.current = touch.clientY;
+    touchCurrentY.current = touch.clientY;
+    setDraggedIndex(index);
+    dragOrderRef.current = [...orderedActivities];
+    draggedElement.current = e.currentTarget as HTMLDivElement;
+
+    // Add visual feedback
+    if (draggedElement.current) {
+      draggedElement.current.style.opacity = '0.8';
+      draggedElement.current.style.transform = 'scale(1.02)';
+      draggedElement.current.style.zIndex = '100';
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (draggedIndex === null || !listContainerRef.current) return;
+
+    e.preventDefault(); // Prevent scrolling while dragging
+
+    const touch = e.touches[0];
+    touchCurrentY.current = touch.clientY;
+
+    // Find which item we're over
+    const items = listContainerRef.current.querySelectorAll('[data-drag-index]');
+    let targetIndex = draggedIndex;
+
+    items.forEach((item, index) => {
+      const rect = item.getBoundingClientRect();
+      const itemMiddle = rect.top + rect.height / 2;
+
+      if (touch.clientY < itemMiddle && index < draggedIndex) {
+        targetIndex = index;
+      } else if (touch.clientY > itemMiddle && index > draggedIndex) {
+        targetIndex = index;
+      }
+    });
+
+    if (targetIndex !== draggedIndex) {
+      const newOrder = [...dragOrderRef.current];
+      const [removed] = newOrder.splice(draggedIndex, 1);
+      newOrder.splice(targetIndex, 0, removed);
+      setOrderedActivities(newOrder);
+      dragOrderRef.current = newOrder;
+      setDraggedIndex(targetIndex);
+    }
+  };
+
+  const handleTouchEnd = async () => {
+    // Remove visual feedback
+    if (draggedElement.current) {
+      draggedElement.current.style.opacity = '';
+      draggedElement.current.style.transform = '';
+      draggedElement.current.style.zIndex = '';
+    }
+    draggedElement.current = null;
+
+    setDraggedIndex(null);
+
     // Save using the ref which has the latest order
     if (selectedDate && dragOrderRef.current.length > 0) {
       await setDayPlan({
@@ -462,7 +537,7 @@ function PlannerContent() {
             )}
 
             {/* Draggable list */}
-            <div className="space-y-2">
+            <div className="space-y-2" ref={listContainerRef}>
               {orderedActivities.map((activityId, index) => {
                 const activity = getLocationById(activityId);
                 if (!activity) return null;
@@ -478,10 +553,14 @@ function PlannerContent() {
                 return (
                   <div
                     key={activityId}
+                    data-drag-index={index}
                     draggable
                     onDragStart={() => handleDragStart(index)}
                     onDragOver={(e) => handleDragOver(e, index)}
                     onDragEnd={handleDragEnd}
+                    onTouchStart={(e) => handleTouchStart(e, index)}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
                     className={`activity-card draggable ${
                       draggedIndex === index ? 'dragging' : ''
                     } ${isPossible ? 'border-yellow-500/30' : ''} ${isCustom ? 'border-gold/30' : ''}`}
