@@ -290,3 +290,66 @@ body {
 .drop-target {
   border: 2px dashed var(--primary);
 }
+
+/* Page with fixed background */
+.page-with-bg {
+  min-height: 100vh;
+  position: relative;
+}
+
+.page-with-bg::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('/images/hobbiton-bkg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  z-index: -1;
+}
+
+.page-with-bg::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: -1;
+}
+
+/* Transparent cards for pages with background */
+.page-with-bg .activity-card {
+  background: rgba(30, 30, 40, 0.7);
+  backdrop-filter: blur(8px);
+}
+
+.page-with-bg .activity-card:hover {
+  background: rgba(40, 40, 55, 0.8);
+}
+
+.page-with-bg select,
+.page-with-bg input[type="time"] {
+  background: rgba(30, 30, 40, 0.7);
+  backdrop-filter: blur(8px);
+}
+
+.page-with-bg .bg-gray-800\/50,
+.page-with-bg .bg-gray-800\/30 {
+  background: rgba(30, 30, 40, 0.7) !important;
+  backdrop-filter: blur(8px);
+}
+
+.page-with-bg .bg-red-900\/30 {
+  background: rgba(100, 30, 30, 0.7) !important;
+  backdrop-filter: blur(8px);
+}
+
+.page-with-bg .bg-purple-900\/20 {
+  background: rgba(60, 30, 80, 0.7) !important;
+  backdrop-filter: blur(8px);
+}

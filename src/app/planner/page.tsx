@@ -138,9 +138,9 @@ export default function PlannerPage() {
   };
 
   return (
-    <main>
+    <main className="page-with-bg">
       <OfflineIndicator />
-      <div className="dashboard safe-bottom">
+      <div className="safe-bottom p-4 md:p-8">
         <div className="max-w-2xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
