@@ -73,7 +73,11 @@ export default function HeroSection() {
                 backgroundImage: `url('https://assets.codepen.io/204808/hobbiton.jpg')`,
               }}
             />
-            <h1 className="hero__title">Hobbiton</h1>
+            <h1 className="hero__title">
+              <span className="hero__title-line">Hobbit</span>
+              <span className="hero__title-line hero__title-line--accent">Journey</span>
+              <span className="hero__title-line hero__title-line--year">2026</span>
+            </h1>
           </div>
           <div className="hero__cover">
             <img

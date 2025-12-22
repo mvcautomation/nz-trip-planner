@@ -39,8 +39,8 @@ export default function DayPage({ params }: DayPageProps) {
 
   if (!day) {
     return (
-      <main className="dashboard safe-bottom">
-        <div className="max-w-2xl mx-auto text-center py-12">
+      <main className="page-with-bg">
+        <div className="safe-bottom p-4 md:p-8 max-w-2xl mx-auto text-center py-12">
           <h1 className="text-2xl font-bold mb-4">Day not found</h1>
           <Link href="/" className="text-blue-400 hover:underline">
             Back to overview
@@ -71,9 +71,9 @@ export default function DayPage({ params }: DayPageProps) {
   };
 
   return (
-    <main>
+    <main className="page-with-bg">
       <OfflineIndicator />
-      <div className="dashboard safe-bottom">
+      <div className="safe-bottom p-4 md:p-8">
         <div className="max-w-2xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">

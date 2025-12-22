@@ -54,19 +54,19 @@ export default function Home() {
         <div className="max-w-4xl mx-auto">
           {/* Stats Header */}
           <div className="mb-6">
-            <h2 className="text-2xl font-bold mb-4">Trip Overview</h2>
+            <h2 className="text-2xl font-bold mb-4 text-[var(--cream)]">Trip Overview</h2>
             <div className="grid grid-cols-3 gap-3">
-              <div className="bg-gray-800/50 rounded-lg p-3 text-center">
-                <p className="text-2xl font-bold text-blue-400">{tripDates.length}</p>
-                <p className="text-xs text-gray-400">Days</p>
+              <div className="stat-card rounded-lg p-3 text-center">
+                <p className="text-2xl font-bold text-[var(--gold)]">{tripDates.length}</p>
+                <p className="text-xs text-[var(--brown-warm)]">Days</p>
               </div>
-              <div className="bg-gray-800/50 rounded-lg p-3 text-center">
-                <p className="text-2xl font-bold text-green-400">{visitedCount}/{totalActivities}</p>
-                <p className="text-xs text-gray-400">Activities</p>
+              <div className="stat-card rounded-lg p-3 text-center">
+                <p className="text-2xl font-bold text-[var(--green-accent)]">{visitedCount}/{totalActivities}</p>
+                <p className="text-xs text-[var(--brown-warm)]">Activities</p>
               </div>
-              <div className="bg-gray-800/50 rounded-lg p-3 text-center">
-                <p className="text-2xl font-bold text-purple-400">{daysRemaining}</p>
-                <p className="text-xs text-gray-400">Days Left</p>
+              <div className="stat-card rounded-lg p-3 text-center">
+                <p className="text-2xl font-bold text-[var(--gold-light)]">{daysRemaining}</p>
+                <p className="text-xs text-[var(--brown-warm)]">Days Left</p>
               </div>
             </div>
           </div>
@@ -74,21 +74,24 @@ export default function Home() {
           {/* Trip Progress */}
           <div className="mb-6">
             <div className="flex justify-between text-sm mb-2">
-              <span className="text-gray-400">Trip Progress</span>
-              <span className="text-gray-300">
+              <span className="text-[var(--brown-warm)]">Trip Progress</span>
+              <span className="text-[var(--cream)]">
                 {Math.round((visitedCount / totalActivities) * 100) || 0}%
               </span>
             </div>
-            <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+            <div className="h-2 bg-[var(--brown)] rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-500"
-                style={{ width: `${(visitedCount / totalActivities) * 100 || 0}%` }}
+                className="h-full rounded-full transition-all duration-500"
+                style={{
+                  width: `${(visitedCount / totalActivities) * 100 || 0}%`,
+                  background: 'linear-gradient(90deg, var(--green-accent) 0%, var(--gold) 100%)'
+                }}
               />
             </div>
           </div>
 
           {/* Calendar Grid */}
-          <h3 className="text-lg font-semibold mb-3">Daily Schedule</h3>
+          <h3 className="text-lg font-semibold mb-3 text-[var(--cream)]">Daily Schedule</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {tripDays.map((day, index) => {
               const dayVisitedCount = day.activities.filter(
@@ -112,21 +115,21 @@ export default function Home() {
           <div className="mt-8 grid grid-cols-2 gap-3">
             <a
               href="/planner"
-              className="bg-blue-600 hover:bg-blue-700 rounded-lg p-4 text-center transition-colors"
+              className="quick-link-planner rounded-lg p-4 text-center transition-all"
             >
-              <svg className="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-8 h-8 mx-auto mb-2 text-[var(--cream)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              <span className="font-medium">Plan Tomorrow</span>
+              <span className="font-medium text-[var(--cream)]">Plan Tomorrow</span>
             </a>
             <a
               href="/emergency"
-              className="bg-red-600/20 hover:bg-red-600/30 border border-red-500/30 rounded-lg p-4 text-center transition-colors"
+              className="quick-link-emergency rounded-lg p-4 text-center transition-all"
             >
-              <svg className="w-8 h-8 mx-auto mb-2 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-8 h-8 mx-auto mb-2 text-[var(--gold)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
-              <span className="font-medium text-red-400">Emergency Info</span>
+              <span className="font-medium text-[var(--gold)]">Emergency Info</span>
             </a>
           </div>
         </div>
