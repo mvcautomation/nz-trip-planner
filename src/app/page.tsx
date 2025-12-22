@@ -5,6 +5,7 @@ import HeroSection from '@/components/hero/HeroSection';
 import DayCard from '@/components/DayCard';
 import BottomNav from '@/components/BottomNav';
 import OfflineIndicator from '@/components/OfflineIndicator';
+import SyncButton from '@/components/SyncButton';
 import { getTripDays, tripDates } from '@/lib/tripData';
 import { getVisitedState, VisitedState } from '@/lib/storage';
 
@@ -54,7 +55,10 @@ export default function Home() {
         <div className="max-w-4xl mx-auto">
           {/* Stats Header */}
           <div className="mb-6">
-            <h2 className="text-2xl font-bold mb-4 text-[var(--cream)]">Trip Overview</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold text-[var(--cream)]">Trip Overview</h2>
+              <SyncButton />
+            </div>
             <div className="grid grid-cols-3 gap-3">
               <div className="stat-card rounded-lg p-3 text-center">
                 <p className="text-2xl font-bold text-[var(--gold)]">{tripDates.length}</p>
