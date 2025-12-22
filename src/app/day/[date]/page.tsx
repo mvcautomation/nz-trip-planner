@@ -6,7 +6,8 @@ import ActivityCard from '@/components/ActivityCard';
 import WeatherWidget from '@/components/WeatherWidget';
 import BottomNav from '@/components/BottomNav';
 import OfflineIndicator from '@/components/OfflineIndicator';
-import { getTripDays, tripDates, Location } from '@/lib/tripData';
+import { getTripDays, tripDates, Location, getAccommodationByDate } from '@/lib/tripData';
+import AccommodationCard from '@/components/AccommodationCard';
 import { getVisitedState, getNotesState, VisitedState, NotesState } from '@/lib/storage';
 
 interface DayPageProps {
@@ -139,7 +140,12 @@ export default function DayPage({ params }: DayPageProps) {
           </div>
 
           {/* Overnight Stay */}
-          {day.stay && (
+          {day.accommodation ? (
+            <AccommodationCard
+              accommodation={day.accommodation}
+              legacyStayName={day.stay?.name}
+            />
+          ) : day.stay && (
             <div className="bg-purple-900/20 border border-purple-500/30 rounded-lg p-4">
               <div className="flex items-center gap-3">
                 <div className="bg-purple-500/20 p-2 rounded-full">

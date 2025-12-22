@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import BottomNav from '@/components/BottomNav';
 import OfflineIndicator from '@/components/OfflineIndicator';
-import { getTripDays, getPossibleActivities, tripDates, Location, getDriveTime } from '@/lib/tripData';
+import { getTripDays, getPossibleActivities, tripDates, Location, getDriveTime, getAccommodationByDate } from '@/lib/tripData';
+import AccommodationCard from '@/components/AccommodationCard';
 import { getDayPlans, setDayPlan, DayPlan } from '@/lib/storage';
 import WeatherWidget from '@/components/WeatherWidget';
 import { formatDriveTime } from '@/lib/maps';
@@ -302,7 +303,12 @@ export default function PlannerPage() {
           </div>
 
           {/* Overnight stay info */}
-          {selectedDay?.stay && (
+          {selectedDay?.accommodation ? (
+            <AccommodationCard
+              accommodation={selectedDay.accommodation}
+              legacyStayName={selectedDay.stay?.name}
+            />
+          ) : selectedDay?.stay && (
             <div className="bg-purple-900/20 border border-purple-500/30 rounded-lg p-4">
               <p className="text-xs text-purple-300 uppercase tracking-wide mb-1">
                 Overnight Stay

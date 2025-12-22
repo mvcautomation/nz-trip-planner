@@ -577,3 +577,172 @@ a:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
+
+/* Accommodation Card - LOTR themed with expandable details */
+.accommodation-card {
+  background: linear-gradient(135deg, rgba(45, 33, 24, 0.85) 0%, rgba(74, 55, 40, 0.75) 100%);
+  border: 1px solid rgba(212, 168, 83, 0.35);
+  border-radius: 1rem;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.accommodation-card:hover {
+  border-color: rgba(212, 168, 83, 0.5);
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(212, 168, 83, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.accommodation-header {
+  padding: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.accommodation-header:hover {
+  background: rgba(212, 168, 83, 0.05);
+}
+
+.accommodation-icon {
+  background: linear-gradient(135deg, rgba(212, 168, 83, 0.25) 0%, rgba(184, 146, 61, 0.15) 100%);
+  padding: 0.625rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(212, 168, 83, 0.2);
+  color: var(--gold-light);
+  flex-shrink: 0;
+}
+
+.expand-btn {
+  background: rgba(212, 168, 83, 0.1);
+  border: 1px solid rgba(212, 168, 83, 0.2);
+  border-radius: 0.5rem;
+  padding: 0.375rem;
+  color: var(--gold-light);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.expand-btn:hover {
+  background: rgba(212, 168, 83, 0.2);
+  border-color: rgba(212, 168, 83, 0.4);
+}
+
+/* Expandable details section */
+.accommodation-details {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.accommodation-details.expanded {
+  max-height: 500px;
+}
+
+.accommodation-details-inner {
+  padding: 0 1rem 1rem 1rem;
+  border-top: 1px solid rgba(212, 168, 83, 0.15);
+  margin-top: 0;
+  padding-top: 1rem;
+}
+
+.detail-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(212, 168, 83, 0.1);
+}
+
+.detail-row:last-of-type {
+  border-bottom: none;
+}
+
+.detail-icon {
+  color: var(--gold);
+  opacity: 0.7;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.detail-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.detail-label {
+  font-size: 0.75rem;
+  color: rgba(212, 168, 83, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+.detail-value {
+  color: var(--cream);
+  font-size: 0.9375rem;
+  word-break: break-word;
+}
+
+.detail-link {
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.detail-link:hover {
+  color: var(--gold);
+}
+
+/* Accommodation action buttons */
+.accommodation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(212, 168, 83, 0.15);
+}
+
+.accommodation-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  cursor: pointer;
+}
+
+.accommodation-btn-primary {
+  background: linear-gradient(135deg, var(--green-accent) 0%, var(--green) 100%);
+  color: var(--cream);
+  border: 1px solid rgba(107, 155, 74, 0.4);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.accommodation-btn-primary:hover {
+  background: linear-gradient(135deg, var(--green-light) 0%, var(--green-accent) 100%);
+  border-color: var(--green-accent);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.accommodation-btn-secondary {
+  background: rgba(212, 168, 83, 0.1);
+  color: var(--gold-light);
+  border: 1px solid rgba(212, 168, 83, 0.25);
+}
+
+.accommodation-btn-secondary:hover {
+  background: rgba(212, 168, 83, 0.2);
+  border-color: rgba(212, 168, 83, 0.4);
+  color: var(--gold);
+}
