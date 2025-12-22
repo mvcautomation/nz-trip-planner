@@ -4,7 +4,7 @@ export interface Location {
   date: string;
   lat: number;
   lng: number;
-  category: 'activity' | 'stay' | 'possible';
+  category: 'activity' | 'stay' | 'possible' | 'custom';
   address?: string;
   bookingRef?: string;
   time?: string;

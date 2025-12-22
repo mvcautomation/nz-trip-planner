@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export default function BottomNav() {
   const pathname = usePathname();
   const waveRef = useRef<SVGSVGElement>(null);
+  const [isReady, setIsReady] = useState(false);
 
   // Get active index from pathname
   const getActiveIndex = () => {
@@ -17,6 +18,19 @@ export default function BottomNav() {
   };
 
   const activeIndex = getActiveIndex();
+
+  // Delay animation until after page is fully loaded
+  useEffect(() => {
+    // Reset ready state on page change
+    setIsReady(false);
+
+    // Wait for page to be fully rendered before enabling animation
+    const timer = setTimeout(() => {
+      setIsReady(true);
+    }, 150);
+
+    return () => clearTimeout(timer);
+  }, [pathname]);
 
   // Align wave on mount and when pathname changes
   useEffect(() => {
@@ -47,7 +61,7 @@ export default function BottomNav() {
   };
 
   return (
-    <nav className="bottom-nav-container">
+    <nav className={`bottom-nav-container ${isReady ? 'nav-ready' : 'nav-loading'}`}>
       <div className="wave-wrap">
         <svg
           ref={waveRef}

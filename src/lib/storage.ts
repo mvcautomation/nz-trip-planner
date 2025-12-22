@@ -18,6 +18,19 @@ const VISITED_KEY = 'nz-trip-visited';
 const NOTES_KEY = 'nz-trip-notes';
 const DAY_PLANS_KEY = 'nz-trip-day-plans';
 const WEATHER_CACHE_KEY = 'nz-trip-weather-cache';
+const CUSTOM_ACTIVITIES_KEY = 'nz-trip-custom-activities';
+
+// Custom activities added by user (from Google Maps links)
+// Extends Location interface for compatibility
+export interface CustomActivity {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  date: string;  // The trip date it was added to
+  category: 'custom';  // Mark as custom type
+  address?: string;
+}
 
 // Visited locations
 export async function getVisitedState(): Promise<VisitedState> {
@@ -84,10 +97,28 @@ export async function setCachedWeather(data: WeatherData): Promise<void> {
   await set(WEATHER_CACHE_KEY, { data, timestamp: Date.now() });
 }
 
+// Custom activities
+export async function getCustomActivities(): Promise<CustomActivity[]> {
+  return (await get(CUSTOM_ACTIVITIES_KEY)) || [];
+}
+
+export async function addCustomActivity(activity: CustomActivity): Promise<void> {
+  const activities = await getCustomActivities();
+  activities.push(activity);
+  await set(CUSTOM_ACTIVITIES_KEY, activities);
+}
+
+export async function removeCustomActivity(activityId: string): Promise<void> {
+  const activities = await getCustomActivities();
+  const filtered = activities.filter(a => a.id !== activityId);
+  await set(CUSTOM_ACTIVITIES_KEY, filtered);
+}
+
 // Clear all data
 export async function clearAllData(): Promise<void> {
   await del(VISITED_KEY);
   await del(NOTES_KEY);
   await del(DAY_PLANS_KEY);
   await del(WEATHER_CACHE_KEY);
+  await del(CUSTOM_ACTIVITIES_KEY);
 }

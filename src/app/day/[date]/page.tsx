@@ -6,9 +6,24 @@ import ActivityCard from '@/components/ActivityCard';
 import WeatherWidget from '@/components/WeatherWidget';
 import BottomNav from '@/components/BottomNav';
 import OfflineIndicator from '@/components/OfflineIndicator';
-import { getTripDays, tripDates, Location, getAccommodationByDate } from '@/lib/tripData';
+import { getTripDays, tripDates, Location } from '@/lib/tripData';
 import AccommodationCard from '@/components/AccommodationCard';
 import { getVisitedState, getNotesState, VisitedState, NotesState } from '@/lib/storage';
+
+// Tolkien quotes for each day - themed for travel and adventure
+const tolkienQuotes = [
+  { quote: "Not all those who wander are lost.", source: "The Fellowship of the Ring" },
+  { quote: "The Road goes ever on and on, down from the door where it began.", source: "The Fellowship of the Ring" },
+  { quote: "It's a dangerous business, going out your door. You step onto the road, and if you don't keep your feet, there's no knowing where you might be swept off to.", source: "The Fellowship of the Ring" },
+  { quote: "Little by little, one travels far.", source: "The Lord of the Rings" },
+  { quote: "Even the smallest person can change the course of the future.", source: "The Fellowship of the Ring" },
+  { quote: "All we have to decide is what to do with the time that is given us.", source: "The Fellowship of the Ring" },
+  { quote: "Home is behind, the world ahead, and there are many paths to tread.", source: "The Fellowship of the Ring" },
+  { quote: "I will not say: do not weep; for not all tears are an evil.", source: "The Return of the King" },
+  { quote: "There is some good in this world, and it's worth fighting for.", source: "The Two Towers" },
+  { quote: "May the wind under your wings bear you where the sun sails and the moon walks.", source: "The Hobbit" },
+  { quote: "The world is indeed full of peril, and in it there are many dark places; but still there is much that is fair.", source: "The Fellowship of the Ring" },
+];
 
 interface DayPageProps {
   params: Promise<{ date: string }>;
@@ -89,7 +104,21 @@ export default function DayPage({ params }: DayPageProps) {
                 {day.activities.length} activities
               </p>
             </div>
-            <div className="w-6" /> {/* Spacer for centering */}
+            <Link
+              href={`/planner?date=${encodeURIComponent(date)}`}
+              className="text-gray-400 hover:text-white transition-colors"
+              title="Edit day"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </Link>
+          </div>
+
+          {/* Tolkien Quote */}
+          <div className="tolkien-quote mb-6">
+            <p className="quote-text">"{tolkienQuotes[dayIndex % tolkienQuotes.length].quote}"</p>
+            <p className="quote-source">— J.R.R. Tolkien, {tolkienQuotes[dayIndex % tolkienQuotes.length].source}</p>
           </div>
 
           {/* Day navigation */}

@@ -343,6 +343,14 @@ body {
   margin-bottom: 0;
 }
 
+/* Disable transitions during page load to prevent animation glitches */
+.nav-loading .wave-wrap #wave,
+.nav-loading .list-wrap li,
+.nav-loading .list-wrap li svg,
+.nav-loading .list-wrap li::before {
+  transition: none !important;
+}
+
 .wave-wrap #wave {
   position: absolute;
   width: 150px;
@@ -756,4 +764,62 @@ a:hover {
   background: rgba(212, 168, 83, 0.2);
   border-color: rgba(212, 168, 83, 0.4);
   color: var(--gold);
+}
+
+/* Tolkien Quote styling */
+.tolkien-quote {
+  background: linear-gradient(135deg, rgba(45, 33, 24, 0.6) 0%, rgba(74, 55, 40, 0.4) 100%);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 0.75rem 0.75rem 0;
+  padding: 1rem 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.tolkien-quote::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(ellipse at top left, rgba(212, 168, 83, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.tolkien-quote .quote-text {
+  font-style: italic;
+  color: var(--cream);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+  position: relative;
+}
+
+.tolkien-quote .quote-source {
+  font-size: 0.75rem;
+  color: var(--gold);
+  opacity: 0.8;
+  position: relative;
+}
+
+/* Google Maps Link Input */
+.maps-link-input {
+  background: rgba(45, 33, 24, 0.6);
+  border: 1px solid rgba(212, 168, 83, 0.25);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  color: var(--cream);
+  font-size: 0.875rem;
+  width: 100%;
+  transition: border-color 0.3s ease;
+}
+
+.maps-link-input:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
+.maps-link-input::placeholder {
+  color: rgba(212, 168, 83, 0.5);
 }
