@@ -203,17 +203,17 @@ export const accommodations: Accommodation[] = [
 
 // Trip dates: Dec 30, 2025 - Jan 9, 2026
 export const tripDates = [
-  { date: '12/30', dateLabel: 'Mon, Dec 30', fullDate: new Date(2025, 11, 30) },
-  { date: '12/31', dateLabel: 'Tue, Dec 31', fullDate: new Date(2025, 11, 31) },
-  { date: '1/1', dateLabel: 'Wed, Jan 1', fullDate: new Date(2026, 0, 1) },
-  { date: '1/2', dateLabel: 'Thu, Jan 2', fullDate: new Date(2026, 0, 2) },
-  { date: '1/3', dateLabel: 'Fri, Jan 3', fullDate: new Date(2026, 0, 3) },
-  { date: '1/4', dateLabel: 'Sat, Jan 4', fullDate: new Date(2026, 0, 4) },
-  { date: '1/5', dateLabel: 'Sun, Jan 5', fullDate: new Date(2026, 0, 5) },
-  { date: '1/6', dateLabel: 'Mon, Jan 6', fullDate: new Date(2026, 0, 6) },
-  { date: '1/7', dateLabel: 'Tue, Jan 7', fullDate: new Date(2026, 0, 7) },
-  { date: '1/8', dateLabel: 'Wed, Jan 8', fullDate: new Date(2026, 0, 8) },
-  { date: '1/9', dateLabel: 'Thu, Jan 9', fullDate: new Date(2026, 0, 9) },
+  { date: '12/30', dateLabel: 'Tue, Dec 30', fullDate: new Date(2025, 11, 30) },
+  { date: '12/31', dateLabel: 'Wed, Dec 31', fullDate: new Date(2025, 11, 31) },
+  { date: '1/1', dateLabel: 'Thu, Jan 1', fullDate: new Date(2026, 0, 1) },
+  { date: '1/2', dateLabel: 'Fri, Jan 2', fullDate: new Date(2026, 0, 2) },
+  { date: '1/3', dateLabel: 'Sat, Jan 3', fullDate: new Date(2026, 0, 3) },
+  { date: '1/4', dateLabel: 'Sun, Jan 4', fullDate: new Date(2026, 0, 4) },
+  { date: '1/5', dateLabel: 'Mon, Jan 5', fullDate: new Date(2026, 0, 5) },
+  { date: '1/6', dateLabel: 'Tue, Jan 6', fullDate: new Date(2026, 0, 6) },
+  { date: '1/7', dateLabel: 'Wed, Jan 7', fullDate: new Date(2026, 0, 7) },
+  { date: '1/8', dateLabel: 'Thu, Jan 8', fullDate: new Date(2026, 0, 8) },
+  { date: '1/9', dateLabel: 'Fri, Jan 9', fullDate: new Date(2026, 0, 9) },
 ];
 
 export function getTripDays(): TripDay[] {
