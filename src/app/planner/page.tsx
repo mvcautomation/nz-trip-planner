@@ -6,6 +6,7 @@ import BottomNav from '@/components/BottomNav';
 import OfflineIndicator from '@/components/OfflineIndicator';
 import { getTripDays, getPossibleActivities, tripDates, Location, getDriveTime } from '@/lib/tripData';
 import { getDayPlans, setDayPlan, DayPlan } from '@/lib/storage';
+import WeatherWidget from '@/components/WeatherWidget';
 import { formatDriveTime } from '@/lib/maps';
 
 export default function PlannerPage() {
@@ -168,6 +169,13 @@ export default function PlannerPage() {
               ))}
             </select>
           </div>
+
+          {/* Weather for selected day */}
+          {selectedDate && (
+            <div className="mb-6">
+              <WeatherWidget date={selectedDate} />
+            </div>
+          )}
 
           {/* Departure time */}
           <div className="mb-6">

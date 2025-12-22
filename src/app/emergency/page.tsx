@@ -230,7 +230,7 @@ export default function EmergencyPage() {
               <div>
                 <p className="font-medium text-yellow-400">Driving in NZ</p>
                 <p className="text-sm text-gray-400">
-                  Drive on the left side. Speed limits: 100km/h on highways, 50km/h in towns.
+                  Drive on the left side. Speed limits: 100km/h <span className="text-gray-500">(62mph)</span> on highways, 50km/h <span className="text-gray-500">(31mph)</span> in towns.
                   Be cautious on winding mountain roads.
                 </p>
               </div>

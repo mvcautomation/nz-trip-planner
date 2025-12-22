@@ -66,6 +66,9 @@ export default function WeatherWidget({ date }: WeatherWidgetProps) {
           <p className="text-xs text-gray-400">{getWeatherDescription(dayWeather.weatherCode)}</p>
           <p className="font-semibold">
             {dayWeather.maxTemp}° / {dayWeather.minTemp}°C
+            <span className="text-xs text-gray-500 ml-1">
+              ({Math.round(dayWeather.maxTemp * 9/5 + 32)}°/{Math.round(dayWeather.minTemp * 9/5 + 32)}°F)
+            </span>
           </p>
           {dayWeather.precipitationChance > 20 && (
             <p className="text-xs text-blue-300">
