@@ -10,7 +10,6 @@ interface AccommodationCardProps {
 
 export default function AccommodationCard({
   accommodation,
-  legacyStayName,
 }: AccommodationCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
