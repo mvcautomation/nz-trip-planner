@@ -86,8 +86,8 @@ body {
   top: 50vh;
   transform: translate(-50%, -50%) scale(0.5);
   z-index: 100;
-  width: 90%;
-  max-width: 600px;
+  width: 95%;
+  max-width: 800px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -101,7 +101,7 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.35em;
   font-weight: 300;
-  font-size: clamp(2.5rem, 10vw, 4.5rem);
+  font-size: clamp(3.5rem, 14vw, 6rem);
   line-height: 1.2;
   text-shadow:
     0 2px 20px rgba(0, 0, 0, 0.9),
@@ -112,7 +112,7 @@ body {
 .hero__title-line--accent {
   font-style: italic;
   font-weight: 400;
-  font-size: clamp(1.5rem, 6vw, 2.75rem);
+  font-size: clamp(2rem, 8vw, 3.5rem);
   letter-spacing: 0.5em;
   color: #fcd34d;
   margin-top: 0.25rem;
@@ -120,12 +120,25 @@ body {
 
 .hero__title-line--year {
   font-weight: 200;
-  font-size: clamp(1rem, 4vw, 1.5rem);
+  font-size: clamp(1.25rem, 5vw, 2rem);
   letter-spacing: 0.8em;
   color: rgba(254, 243, 199, 0.7);
   margin-top: 0.75rem;
   border-top: 1px solid rgba(254, 243, 199, 0.3);
   padding-top: 0.75rem;
+}
+
+/* Black overlay that fades in during scroll for better title readability */
+.hero__title-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: black;
+  opacity: 0;
+  z-index: 50;
+  pointer-events: none;
 }
 
 .hero__cover {

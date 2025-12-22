@@ -56,6 +56,14 @@ export default function HeroSection() {
             ease: 'power1.inOut',
           },
           '<'
+        )
+        .to(
+          '.hero__title-overlay',
+          {
+            opacity: 0.6,
+            ease: 'power1.inOut',
+          },
+          '<'
         );
     }, containerRef);
 
@@ -73,6 +81,8 @@ export default function HeroSection() {
                 backgroundImage: `url('https://assets.codepen.io/204808/hobbiton.jpg')`,
               }}
             />
+            {/* Black overlay that fades in during scroll */}
+            <div className="hero__title-overlay" />
             <h1 className="hero__title">
               <span className="hero__title-line">Hobbit</span>
               <span className="hero__title-line hero__title-line--accent">Journey</span>
