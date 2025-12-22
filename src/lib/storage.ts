@@ -21,6 +21,9 @@ const WEATHER_CACHE_KEY = 'nz-trip-weather-cache';
 const CUSTOM_ACTIVITIES_KEY = 'nz-trip-custom-activities';
 const LAST_SYNC_KEY = 'nz-trip-last-sync';
 
+// Sync server URL - uses webhook server for cross-device sync
+const SYNC_SERVER_URL = 'https://webhooks.ai-app.space/nz-trip/sync';
+
 // Custom activities added by user (from Google Maps links)
 // Extends Location interface for compatibility
 export interface CustomActivity {
@@ -36,7 +39,7 @@ export interface CustomActivity {
 // Sync helper - fire and forget to server
 async function syncToServer(action: string, data: unknown): Promise<void> {
   try {
-    await fetch('/api/sync', {
+    await fetch(SYNC_SERVER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action, data }),
@@ -152,7 +155,7 @@ export async function clearAllData(): Promise<void> {
 // Pull data from server and merge with local (server wins for conflicts)
 export async function pullFromServer(): Promise<boolean> {
   try {
-    const response = await fetch('/api/sync');
+    const response = await fetch(SYNC_SERVER_URL);
     if (!response.ok) return false;
 
     const serverData = await response.json();
@@ -217,7 +220,7 @@ export async function pushToServer(): Promise<boolean> {
     // Remove category from custom activities for server
     const serverActivities = customActivities.map(({ category, ...rest }) => rest);
 
-    const response = await fetch('/api/sync', {
+    const response = await fetch(SYNC_SERVER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
