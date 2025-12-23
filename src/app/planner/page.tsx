@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, Suspense, useRef } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import BottomNav from '@/components/BottomNav';
 import OfflineIndicator from '@/components/OfflineIndicator';
@@ -39,6 +39,7 @@ function PlannerLoading() {
 
 function PlannerContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [orderedActivities, setOrderedActivities] = useState<string[]>([]);
   const [departureTime, setDepartureTime] = useState<string>('08:00');
@@ -258,20 +259,23 @@ function PlannerContent() {
   const estimatedTimes = getEstimatedTimes();
 
   // Drag handlers (mouse)
-  const handleDragStart = (index: number) => {
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    e.dataTransfer.effectAllowed = 'move';
     setDraggedIndex(index);
     dragOrderRef.current = [...orderedActivities];
   };
 
   const handleDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
     if (draggedIndex === null || draggedIndex === index) return;
 
-    const newOrder = [...orderedActivities];
+    // Use the ref for the current order to avoid stale state
+    const newOrder = [...dragOrderRef.current];
     const [removed] = newOrder.splice(draggedIndex, 1);
     newOrder.splice(index, 0, removed);
-    setOrderedActivities(newOrder);
     dragOrderRef.current = newOrder;
+    setOrderedActivities(newOrder);
     setDraggedIndex(index);
   };
 
@@ -403,6 +407,12 @@ function PlannerContent() {
     setEditMapsLink('');
   };
 
+  const viewDay = () => {
+    if (selectedDate) {
+      router.push(`/day/${encodeURIComponent(selectedDate)}`);
+    }
+  };
+
   return (
     <main className="page-with-bg">
       <OfflineIndicator />
@@ -416,7 +426,16 @@ function PlannerContent() {
               </svg>
             </Link>
             <h1 className="text-xl font-bold">Day Planner</h1>
-            <div className="w-6" />
+            <button
+              onClick={viewDay}
+              className="text-gray-400 hover:text-white transition-colors"
+              title="View day"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            </button>
           </div>
 
           {/* Date selector */}
@@ -539,7 +558,7 @@ function PlannerContent() {
                     key={activityId}
                     data-drag-index={index}
                     draggable
-                    onDragStart={() => handleDragStart(index)}
+                    onDragStart={(e) => handleDragStart(e, index)}
                     onDragOver={(e) => handleDragOver(e, index)}
                     onDragEnd={handleDragEnd}
                     onTouchStart={(e) => handleTouchStart(e, index)}
@@ -559,7 +578,10 @@ function PlannerContent() {
                       </div>
 
                       {/* Order number */}
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${isCustom ? 'bg-gold/30' : 'bg-blue-600'}`} style={isCustom ? { backgroundColor: 'rgba(212, 168, 83, 0.3)' } : undefined}>
+                      <div
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
+                        style={{ backgroundColor: isCustom ? 'rgba(212, 168, 83, 0.3)' : 'var(--green-accent)' }}
+                      >
                         {index + 1}
                       </div>
 

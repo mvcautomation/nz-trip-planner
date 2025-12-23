@@ -8,7 +8,7 @@ import BottomNav from '@/components/BottomNav';
 import OfflineIndicator from '@/components/OfflineIndicator';
 import { getTripDays, tripDates, Location } from '@/lib/tripData';
 import AccommodationCard from '@/components/AccommodationCard';
-import { getVisitedState, getNotesState, VisitedState, NotesState } from '@/lib/storage';
+import { getVisitedState, getNotesState, VisitedState, NotesState, getDayPlans, getCustomActivities } from '@/lib/storage';
 
 // Tolkien quotes for each day - themed for travel and adventure
 const tolkienQuotes = [
@@ -34,6 +34,8 @@ export default function DayPage({ params }: DayPageProps) {
   const date = decodeURIComponent(resolvedParams.date);
   const [visitedState, setVisitedState] = useState<VisitedState>({});
   const [notesState, setNotesState] = useState<NotesState>({});
+  const [orderedActivities, setOrderedActivities] = useState<Location[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const tripDays = getTripDays();
   const dayIndex = tripDates.findIndex((d) => d.date === date);
@@ -43,15 +45,38 @@ export default function DayPage({ params }: DayPageProps) {
 
   useEffect(() => {
     async function loadState() {
-      const [visited, notes] = await Promise.all([
+      const [visited, notes, plans, customActivities] = await Promise.all([
         getVisitedState(),
         getNotesState(),
+        getDayPlans(),
+        getCustomActivities(),
       ]);
       setVisitedState(visited);
       setNotesState(notes);
+
+      // Load ordered activities from saved plan
+      if (day) {
+        const plan = plans[date];
+        if (plan && plan.orderedActivities.length > 0) {
+          // Build ordered list from saved IDs
+          const ordered: Location[] = [];
+          for (const id of plan.orderedActivities) {
+            const activity = day.activities.find(a => a.id === id) ||
+                           customActivities.find(a => a.id === id);
+            if (activity) {
+              ordered.push(activity);
+            }
+          }
+          setOrderedActivities(ordered);
+        } else {
+          // Default to trip data order
+          setOrderedActivities(day.activities);
+        }
+      }
+      setIsLoading(false);
     }
     loadState();
-  }, []);
+  }, [date, day]);
 
   if (!day) {
     return (
@@ -75,7 +100,7 @@ export default function DayPage({ params }: DayPageProps) {
       if (prevDay?.activities.length) return prevDay.activities[prevDay.activities.length - 1];
       return undefined;
     }
-    return day.activities[index - 1];
+    return orderedActivities[index - 1];
   };
 
   const handleVisitedChange = (id: string, visited: boolean) => {
@@ -151,10 +176,15 @@ export default function DayPage({ params }: DayPageProps) {
           {/* Activities */}
           <div className="space-y-3 mb-6">
             <h2 className="text-lg font-semibold">Activities</h2>
-            {day.activities.length === 0 ? (
+            {isLoading ? (
+              <div className="animate-pulse space-y-3">
+                <div className="h-24 bg-gray-700 rounded-lg"></div>
+                <div className="h-24 bg-gray-700 rounded-lg"></div>
+              </div>
+            ) : orderedActivities.length === 0 ? (
               <p className="text-gray-400 text-center py-8">No activities scheduled for this day</p>
             ) : (
-              day.activities.map((activity, index) => (
+              orderedActivities.map((activity, index) => (
                 <ActivityCard
                   key={activity.id}
                   activity={activity}
@@ -203,7 +233,7 @@ export default function DayPage({ params }: DayPageProps) {
             <div className="flex justify-between text-sm mb-2">
               <span className="text-gray-400">Day Progress</span>
               <span className="text-gray-300">
-                {day.activities.filter((a) => visitedState[a.id]).length}/{day.activities.length}
+                {orderedActivities.filter((a) => visitedState[a.id]).length}/{orderedActivities.length}
               </span>
             </div>
             <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
@@ -211,9 +241,9 @@ export default function DayPage({ params }: DayPageProps) {
                 className="h-full bg-green-500 rounded-full transition-all duration-300"
                 style={{
                   width: `${
-                    day.activities.length > 0
-                      ? (day.activities.filter((a) => visitedState[a.id]).length /
-                          day.activities.length) *
+                    orderedActivities.length > 0
+                      ? (orderedActivities.filter((a) => visitedState[a.id]).length /
+                          orderedActivities.length) *
                         100
                       : 0
                   }%`,
