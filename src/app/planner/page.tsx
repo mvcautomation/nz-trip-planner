@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import BottomNav from '@/components/BottomNav';
 import OfflineIndicator from '@/components/OfflineIndicator';
-import { getTripDays, getPossibleActivities, tripDates, Location, getDriveTime } from '@/lib/tripData';
+import { getTripDays, tripDates, Location, getDriveTime } from '@/lib/tripData';
 import AccommodationCard from '@/components/AccommodationCard';
 import { getDayPlans, setDayPlan, getCustomActivities, addCustomActivity, CustomActivity, getActivityEnrichments, setActivityEnrichment, ActivityEnrichments } from '@/lib/storage';
 import WeatherWidget from '@/components/WeatherWidget';
@@ -42,7 +42,6 @@ function PlannerContent() {
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [orderedActivities, setOrderedActivities] = useState<string[]>([]);
   const [departureTime, setDepartureTime] = useState<string>('08:00');
-  const [showPossible, setShowPossible] = useState(false);
   const [showMapsInput, setShowMapsInput] = useState(false);
   const [mapsLink, setMapsLink] = useState('');
   const [mapsLinkError, setMapsLinkError] = useState('');
@@ -60,7 +59,6 @@ function PlannerContent() {
   const listContainerRef = useRef<HTMLDivElement>(null);
 
   const tripDays = getTripDays();
-  const possibleActivities = getPossibleActivities();
 
   // Get the day data for the selected date
   const selectedDay = tripDays.find((d) => d.date === selectedDate);
@@ -135,7 +133,6 @@ function PlannerContent() {
   const getLocationById = (id: string): Location | undefined => {
     return (
       selectedDay?.activities.find((a) => a.id === id) ||
-      possibleActivities.find((a) => a.id === id) ||
       customActivities.find((a) => a.id === id)
     );
   };
@@ -361,22 +358,6 @@ function PlannerContent() {
     }
   };
 
-  // Add possible activity
-  const addActivity = async (activityId: string) => {
-    if (!orderedActivities.includes(activityId)) {
-      const newOrder = [...orderedActivities, activityId];
-      setOrderedActivities(newOrder);
-      if (selectedDate) {
-        await setDayPlan({
-          date: selectedDate,
-          orderedActivities: newOrder,
-          departureTime,
-        });
-      }
-    }
-    setShowPossible(false);
-  };
-
   // Remove activity
   const removeActivity = async (activityId: string) => {
     const newOrder = orderedActivities.filter((id) => id !== activityId);
@@ -486,27 +467,13 @@ function PlannerContent() {
           <div className="mb-6">
             <div className="flex justify-between items-center mb-3">
               <h2 className="text-lg font-semibold">Activity Order</h2>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => {
-                    setShowMapsInput(!showMapsInput);
-                    setShowPossible(false);
-                  }}
-                  className="text-sm text-gold hover:text-gold-light"
-                  style={{ color: 'var(--gold)' }}
-                >
-                  + Maps Link
-                </button>
-                <button
-                  onClick={() => {
-                    setShowPossible(!showPossible);
-                    setShowMapsInput(false);
-                  }}
-                  className="text-sm text-blue-400 hover:text-blue-300"
-                >
-                  + Preset
-                </button>
-              </div>
+              <button
+                onClick={() => setShowMapsInput(!showMapsInput)}
+                className="text-sm text-gold hover:text-gold-light"
+                style={{ color: 'var(--gold)' }}
+              >
+                + Add Activity
+              </button>
             </div>
 
             {/* Google Maps link input */}
@@ -554,28 +521,6 @@ function PlannerContent() {
               </div>
             )}
 
-            {/* Possible activities dropdown */}
-            {showPossible && (
-              <div className="mb-4 bg-gray-800/50 border border-gray-600 rounded-lg p-3">
-                <p className="text-sm text-gray-400 mb-2">Add from preset activities:</p>
-                <div className="space-y-2">
-                  {possibleActivities.map((activity) => (
-                    <button
-                      key={activity.id}
-                      onClick={() => addActivity(activity.id)}
-                      disabled={orderedActivities.includes(activity.id)}
-                      className="w-full text-left p-2 rounded bg-gray-700/50 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                      {activity.name}
-                      {orderedActivities.includes(activity.id) && (
-                        <span className="text-xs text-gray-400 ml-2">(added)</span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* Draggable list */}
             <div className="space-y-2" ref={listContainerRef}>
               {orderedActivities.map((activityId, index) => {
@@ -587,7 +532,6 @@ function PlannerContent() {
                   ? getDriveTime(prevActivityId, activityId)
                   : null;
 
-                const isPossible = possibleActivities.some((a) => a.id === activityId);
                 const isCustom = customActivities.some((a) => a.id === activityId);
 
                 return (
@@ -603,7 +547,7 @@ function PlannerContent() {
                     onTouchEnd={handleTouchEnd}
                     className={`activity-card draggable ${
                       draggedIndex === index ? 'dragging' : ''
-                    } ${isPossible ? 'border-yellow-500/30' : ''} ${isCustom ? 'border-gold/30' : ''}`}
+                    } ${isCustom ? 'border-gold/30' : ''}`}
                     style={isCustom ? { borderColor: 'rgba(212, 168, 83, 0.3)' } : undefined}
                   >
                     <div className="flex items-center gap-3">
@@ -629,9 +573,6 @@ function PlannerContent() {
                               <span>•</span>
                               <span>{formatDriveTime(driveTime)} drive</span>
                             </>
-                          )}
-                          {isPossible && (
-                            <span className="text-yellow-400">(optional)</span>
                           )}
                           {isCustom && (
                             <span style={{ color: 'var(--gold)' }}>(custom)</span>
