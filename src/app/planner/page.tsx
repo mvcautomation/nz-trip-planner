@@ -7,7 +7,7 @@ import BottomNav from '@/components/BottomNav';
 import OfflineIndicator from '@/components/OfflineIndicator';
 import { getTripDays, getPossibleActivities, tripDates, Location, getDriveTime } from '@/lib/tripData';
 import AccommodationCard from '@/components/AccommodationCard';
-import { getDayPlans, setDayPlan, getCustomActivities, addCustomActivity, CustomActivity } from '@/lib/storage';
+import { getDayPlans, setDayPlan, getCustomActivities, addCustomActivity, CustomActivity, getActivityEnrichments, setActivityEnrichment, ActivityEnrichments } from '@/lib/storage';
 import WeatherWidget from '@/components/WeatherWidget';
 import { formatDriveTime } from '@/lib/maps';
 
@@ -48,6 +48,10 @@ function PlannerContent() {
   const [mapsLinkError, setMapsLinkError] = useState('');
   const [isLoadingLink, setIsLoadingLink] = useState(false);
   const [customActivities, setCustomActivities] = useState<CustomActivity[]>([]);
+  const [activityEnrichments, setActivityEnrichmentsState] = useState<ActivityEnrichments>({});
+  const [editingActivity, setEditingActivity] = useState<string | null>(null);
+  const [editAddress, setEditAddress] = useState('');
+  const [editMapsLink, setEditMapsLink] = useState('');
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const dragOrderRef = useRef<string[]>([]);
   const touchStartY = useRef<number>(0);
@@ -95,13 +99,17 @@ function PlannerContent() {
     setSelectedDate(tripDates[targetIndex].date);
   }, [searchParams]);
 
-  // Load custom activities
+  // Load custom activities and enrichments
   useEffect(() => {
-    async function loadCustomActivities() {
-      const activities = await getCustomActivities();
+    async function loadCustomData() {
+      const [activities, enrichments] = await Promise.all([
+        getCustomActivities(),
+        getActivityEnrichments(),
+      ]);
       setCustomActivities(activities);
+      setActivityEnrichmentsState(enrichments);
     }
-    loadCustomActivities();
+    loadCustomData();
   }, []);
 
   // Load saved plan for selected date
@@ -382,6 +390,38 @@ function PlannerContent() {
     }
   };
 
+  // Edit activity enrichment
+  const startEditing = (activityId: string) => {
+    const enrichment = activityEnrichments[activityId] || {};
+    setEditAddress(enrichment.address || '');
+    setEditMapsLink(enrichment.mapsLink || '');
+    setEditingActivity(activityId);
+  };
+
+  const saveEnrichment = async () => {
+    if (!editingActivity) return;
+
+    const enrichment = {
+      address: editAddress.trim() || undefined,
+      mapsLink: editMapsLink.trim() || undefined,
+    };
+
+    await setActivityEnrichment(editingActivity, enrichment);
+    setActivityEnrichmentsState({
+      ...activityEnrichments,
+      [editingActivity]: enrichment,
+    });
+    setEditingActivity(null);
+    setEditAddress('');
+    setEditMapsLink('');
+  };
+
+  const cancelEditing = () => {
+    setEditingActivity(null);
+    setEditAddress('');
+    setEditMapsLink('');
+  };
+
   return (
     <main className="page-with-bg">
       <OfflineIndicator />
@@ -580,9 +620,9 @@ function PlannerContent() {
                       </div>
 
                       {/* Activity info */}
-                      <div className="flex-1">
+                      <div className="flex-1 min-w-0">
                         <p className="font-medium">{activity.name}</p>
-                        <div className="flex items-center gap-2 text-xs text-gray-400">
+                        <div className="flex items-center gap-2 text-xs text-gray-400 flex-wrap">
                           <span>{estimatedTimes[index]}</span>
                           {driveTime && (
                             <>
@@ -597,7 +637,35 @@ function PlannerContent() {
                             <span style={{ color: 'var(--gold)' }}>(custom)</span>
                           )}
                         </div>
+                        {/* Show enriched info if available */}
+                        {activityEnrichments[activityId]?.address && (
+                          <p className="text-xs text-gray-500 mt-1 truncate">
+                            📍 {activityEnrichments[activityId].address}
+                          </p>
+                        )}
+                        {activityEnrichments[activityId]?.mapsLink && (
+                          <a
+                            href={activityEnrichments[activityId].mapsLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-blue-400 hover:text-blue-300 mt-1 inline-block"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            🗺️ Open in Maps
+                          </a>
+                        )}
                       </div>
+
+                      {/* Edit button */}
+                      <button
+                        onClick={() => startEditing(activityId)}
+                        className="text-gray-500 hover:text-blue-400 transition-colors p-1"
+                        title="Add address or maps link"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </button>
 
                       {/* Remove button */}
                       <button
@@ -637,6 +705,60 @@ function PlannerContent() {
           )}
         </div>
       </div>
+
+      {/* Edit Activity Modal */}
+      {editingActivity && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+          <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-bold mb-4">
+              Edit: {getLocationById(editingActivity)?.name}
+            </h3>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Address</label>
+                <input
+                  type="text"
+                  value={editAddress}
+                  onChange={(e) => setEditAddress(e.target.value)}
+                  placeholder="Enter address..."
+                  className="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Google Maps Link</label>
+                <input
+                  type="text"
+                  value={editMapsLink}
+                  onChange={(e) => setEditMapsLink(e.target.value)}
+                  placeholder="Paste Google Maps URL..."
+                  className="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Copy the share link from Google Maps
+                </p>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={saveEnrichment}
+                  className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                >
+                  Save
+                </button>
+                <button
+                  onClick={cancelEditing}
+                  className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <BottomNav />
     </main>
   );

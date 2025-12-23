@@ -19,6 +19,7 @@ const NOTES_KEY = 'nz-trip-notes';
 const DAY_PLANS_KEY = 'nz-trip-day-plans';
 const WEATHER_CACHE_KEY = 'nz-trip-weather-cache';
 const CUSTOM_ACTIVITIES_KEY = 'nz-trip-custom-activities';
+const ACTIVITY_ENRICHMENTS_KEY = 'nz-trip-activity-enrichments';
 const LAST_SYNC_KEY = 'nz-trip-last-sync';
 
 // Sync server URL - uses webhook server for cross-device sync
@@ -140,6 +141,27 @@ export async function removeCustomActivity(activityId: string): Promise<void> {
   syncToServer('removeCustomActivity', { activityId });
 }
 
+// Activity enrichments - additional info for any activity (address, maps link, etc.)
+export interface ActivityEnrichment {
+  address?: string;
+  mapsLink?: string;
+}
+
+export interface ActivityEnrichments {
+  [activityId: string]: ActivityEnrichment;
+}
+
+export async function getActivityEnrichments(): Promise<ActivityEnrichments> {
+  return (await get(ACTIVITY_ENRICHMENTS_KEY)) || {};
+}
+
+export async function setActivityEnrichment(activityId: string, enrichment: ActivityEnrichment): Promise<void> {
+  const enrichments = await getActivityEnrichments();
+  enrichments[activityId] = enrichment;
+  await set(ACTIVITY_ENRICHMENTS_KEY, enrichments);
+  syncToServer('setActivityEnrichment', { activityId, enrichment });
+}
+
 // Clear all data
 export async function clearAllData(): Promise<void> {
   await del(VISITED_KEY);
@@ -147,6 +169,7 @@ export async function clearAllData(): Promise<void> {
   await del(DAY_PLANS_KEY);
   await del(WEATHER_CACHE_KEY);
   await del(CUSTOM_ACTIVITIES_KEY);
+  await del(ACTIVITY_ENRICHMENTS_KEY);
   await del(LAST_SYNC_KEY);
 }
 
@@ -199,6 +222,13 @@ export async function pullFromServer(): Promise<boolean> {
       await set(CUSTOM_ACTIVITIES_KEY, Array.from(activityMap.values()));
     }
 
+    // Merge activity enrichments (server wins)
+    if (serverData.activityEnrichments && Object.keys(serverData.activityEnrichments).length > 0) {
+      const localEnrichments = await getActivityEnrichments();
+      const merged = { ...localEnrichments, ...serverData.activityEnrichments };
+      await set(ACTIVITY_ENRICHMENTS_KEY, merged);
+    }
+
     await set(LAST_SYNC_KEY, Date.now());
     return true;
   } catch (error) {
@@ -210,11 +240,12 @@ export async function pullFromServer(): Promise<boolean> {
 // Push all local data to server (initial sync)
 export async function pushToServer(): Promise<boolean> {
   try {
-    const [visited, notes, dayPlans, customActivities] = await Promise.all([
+    const [visited, notes, dayPlans, customActivities, activityEnrichments] = await Promise.all([
       getVisitedState(),
       getNotesState(),
       getDayPlans(),
       getCustomActivities(),
+      getActivityEnrichments(),
     ]);
 
     // Remove category from custom activities for server
@@ -230,6 +261,7 @@ export async function pushToServer(): Promise<boolean> {
           notes,
           dayPlans,
           customActivities: serverActivities,
+          activityEnrichments,
         },
       }),
     });
