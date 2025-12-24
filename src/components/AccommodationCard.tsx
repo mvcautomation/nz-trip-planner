@@ -1,23 +1,62 @@
 'use client';
 
-import { useState } from 'react';
-import { Accommodation } from '@/lib/tripData';
+import { useState, useEffect } from 'react';
+import { Accommodation, Location, getDriveTime } from '@/lib/tripData';
+import { formatDriveTime, fetchDriveTime } from '@/lib/maps';
 
 interface AccommodationCardProps {
   accommodation: Accommodation;
   legacyStayName?: string;
+  lastActivity?: Location;
 }
 
 export default function AccommodationCard({
   accommodation,
+  lastActivity,
 }: AccommodationCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [driveTime, setDriveTime] = useState<number | null>(null);
+
+  // Fetch drive time from last activity to accommodation
+  useEffect(() => {
+    if (!lastActivity) {
+      setDriveTime(null);
+      return;
+    }
+
+    // Try hardcoded first
+    const hardcoded = getDriveTime(lastActivity.id, accommodation.id);
+    if (hardcoded) {
+      setDriveTime(hardcoded);
+      return;
+    }
+
+    // Fetch from Google Maps API
+    fetchDriveTime(
+      lastActivity.lat,
+      lastActivity.lng,
+      accommodation.lat,
+      accommodation.lng
+    ).then((time) => {
+      if (time) setDriveTime(time);
+    });
+  }, [lastActivity, accommodation]);
 
   const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(accommodation.address)}`;
   const googleMapsSearchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(accommodation.hotelName + ' ' + accommodation.city)}`;
 
   return (
     <div className="accommodation-card">
+      {/* Drive time indicator */}
+      {driveTime && (
+        <div className="flex items-center gap-2 text-xs text-gray-400 px-4 pt-3 pb-2 border-b border-gray-700/50">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+          </svg>
+          <span>{formatDriveTime(driveTime)} drive from {lastActivity?.name}</span>
+        </div>
+      )}
+
       {/* Header - always visible */}
       <div
         className="accommodation-header"
