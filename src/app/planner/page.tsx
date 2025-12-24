@@ -7,7 +7,7 @@ import BottomNav from '@/components/BottomNav';
 import OfflineIndicator from '@/components/OfflineIndicator';
 import { getTripDays, tripDates, Location, getDriveTime } from '@/lib/tripData';
 import AccommodationCard from '@/components/AccommodationCard';
-import { getDayPlans, setDayPlan, getCustomActivities, addCustomActivity, CustomActivity, getActivityEnrichments, setActivityEnrichment, ActivityEnrichments } from '@/lib/storage';
+import { getDayPlans, setDayPlan, getCustomActivities, addCustomActivity, CustomActivity, getActivityEnrichments, setActivityEnrichment, ActivityEnrichments, pullFromServer } from '@/lib/storage';
 import WeatherWidget from '@/components/WeatherWidget';
 import { formatDriveTime } from '@/lib/maps';
 
@@ -58,6 +58,7 @@ function PlannerContent() {
   const touchCurrentY = useRef<number>(0);
   const draggedElement = useRef<HTMLDivElement | null>(null);
   const listContainerRef = useRef<HTMLDivElement>(null);
+  const hasSynced = useRef(false);
 
   const tripDays = getTripDays();
 
@@ -101,6 +102,12 @@ function PlannerContent() {
   // Load custom activities and enrichments
   useEffect(() => {
     async function loadCustomData() {
+      // Sync from server once per page navigation
+      if (!hasSynced.current) {
+        hasSynced.current = true;
+        await pullFromServer();
+      }
+
       const [activities, enrichments] = await Promise.all([
         getCustomActivities(),
         getActivityEnrichments(),

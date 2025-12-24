@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, use } from 'react';
+import { useEffect, useState, use, useRef } from 'react';
 import Link from 'next/link';
 import ActivityCard from '@/components/ActivityCard';
 import WeatherWidget from '@/components/WeatherWidget';
@@ -9,7 +9,7 @@ import OfflineIndicator from '@/components/OfflineIndicator';
 import MapView, { locationsToMarkers, accommodationToMarker } from '@/components/MapView';
 import { getTripDays, tripDates, Location, accommodations } from '@/lib/tripData';
 import AccommodationCard from '@/components/AccommodationCard';
-import { getVisitedState, getNotesState, VisitedState, NotesState, getDayPlans, getCustomActivities } from '@/lib/storage';
+import { getVisitedState, getNotesState, VisitedState, NotesState, getDayPlans, getCustomActivities, pullFromServer } from '@/lib/storage';
 
 // Tolkien quotes for each day - themed for travel and adventure
 const tolkienQuotes = [
@@ -37,6 +37,7 @@ export default function DayPage({ params }: DayPageProps) {
   const [notesState, setNotesState] = useState<NotesState>({});
   const [orderedActivities, setOrderedActivities] = useState<Location[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const hasSynced = useRef(false);
 
   const tripDays = getTripDays();
   const dayIndex = tripDates.findIndex((d) => d.date === date);
@@ -46,6 +47,12 @@ export default function DayPage({ params }: DayPageProps) {
 
   useEffect(() => {
     async function loadState() {
+      // Sync from server once per page navigation
+      if (!hasSynced.current) {
+        hasSynced.current = true;
+        await pullFromServer();
+      }
+
       const [visited, notes, plans, customActivities] = await Promise.all([
         getVisitedState(),
         getNotesState(),

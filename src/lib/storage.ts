@@ -175,91 +175,66 @@ export async function clearAllData(): Promise<void> {
 
 // Sync functions for cross-device data sharing
 
-// Throttle state for pullFromServer - only sync once every 5 seconds max
-let lastPullTime = 0;
-let pullInProgress: Promise<boolean> | null = null;
-const PULL_THROTTLE_MS = 5000;
-
 // Pull data from server and merge with local (server wins for conflicts)
-// Throttled to prevent excessive requests
 export async function pullFromServer(): Promise<boolean> {
-  const now = Date.now();
+  try {
+    const response = await fetch(SYNC_SERVER_URL);
+    if (!response.ok) return false;
 
-  // If a pull is already in progress, return that promise
-  if (pullInProgress) {
-    return pullInProgress;
-  }
+    const serverData = await response.json();
 
-  // If we pulled recently, skip
-  if (now - lastPullTime < PULL_THROTTLE_MS) {
-    return true; // Return success since we have recent data
-  }
-
-  pullInProgress = (async () => {
-    try {
-      const response = await fetch(SYNC_SERVER_URL);
-      if (!response.ok) return false;
-
-      const serverData = await response.json();
-
-      // Merge visited state (server wins)
-      if (serverData.visited && Object.keys(serverData.visited).length > 0) {
-        const localVisited = await getVisitedState();
-        const merged = { ...localVisited, ...serverData.visited };
-        await set(VISITED_KEY, merged);
-      }
-
-      // Merge notes (server wins)
-      if (serverData.notes && Object.keys(serverData.notes).length > 0) {
-        const localNotes = await getNotesState();
-        const merged = { ...localNotes, ...serverData.notes };
-        await set(NOTES_KEY, merged);
-      }
-
-      // Merge day plans (server wins)
-      if (serverData.dayPlans && Object.keys(serverData.dayPlans).length > 0) {
-        const localPlans = await getDayPlans();
-        const merged = { ...localPlans, ...serverData.dayPlans };
-        await set(DAY_PLANS_KEY, merged);
-      }
-
-      // Merge custom activities (server wins, merge by id)
-      if (serverData.customActivities && serverData.customActivities.length > 0) {
-        const localActivities = await getCustomActivities();
-        const activityMap = new Map<string, CustomActivity>();
-
-        // Add local first
-        for (const activity of localActivities) {
-          activityMap.set(activity.id, activity);
-        }
-
-        // Server overwrites
-        for (const activity of serverData.customActivities) {
-          activityMap.set(activity.id, { ...activity, category: 'custom' as const });
-        }
-
-        await set(CUSTOM_ACTIVITIES_KEY, Array.from(activityMap.values()));
-      }
-
-      // Merge activity enrichments (server wins)
-      if (serverData.activityEnrichments && Object.keys(serverData.activityEnrichments).length > 0) {
-        const localEnrichments = await getActivityEnrichments();
-        const merged = { ...localEnrichments, ...serverData.activityEnrichments };
-        await set(ACTIVITY_ENRICHMENTS_KEY, merged);
-      }
-
-      await set(LAST_SYNC_KEY, Date.now());
-      lastPullTime = Date.now();
-      return true;
-    } catch (error) {
-      console.warn('Failed to pull from server:', error);
-      return false;
-    } finally {
-      pullInProgress = null;
+    // Merge visited state (server wins)
+    if (serverData.visited && Object.keys(serverData.visited).length > 0) {
+      const localVisited = await getVisitedState();
+      const merged = { ...localVisited, ...serverData.visited };
+      await set(VISITED_KEY, merged);
     }
-  })();
 
-  return pullInProgress;
+    // Merge notes (server wins)
+    if (serverData.notes && Object.keys(serverData.notes).length > 0) {
+      const localNotes = await getNotesState();
+      const merged = { ...localNotes, ...serverData.notes };
+      await set(NOTES_KEY, merged);
+    }
+
+    // Merge day plans (server wins)
+    if (serverData.dayPlans && Object.keys(serverData.dayPlans).length > 0) {
+      const localPlans = await getDayPlans();
+      const merged = { ...localPlans, ...serverData.dayPlans };
+      await set(DAY_PLANS_KEY, merged);
+    }
+
+    // Merge custom activities (server wins, merge by id)
+    if (serverData.customActivities && serverData.customActivities.length > 0) {
+      const localActivities = await getCustomActivities();
+      const activityMap = new Map<string, CustomActivity>();
+
+      // Add local first
+      for (const activity of localActivities) {
+        activityMap.set(activity.id, activity);
+      }
+
+      // Server overwrites
+      for (const activity of serverData.customActivities) {
+        activityMap.set(activity.id, { ...activity, category: 'custom' as const });
+      }
+
+      await set(CUSTOM_ACTIVITIES_KEY, Array.from(activityMap.values()));
+    }
+
+    // Merge activity enrichments (server wins)
+    if (serverData.activityEnrichments && Object.keys(serverData.activityEnrichments).length > 0) {
+      const localEnrichments = await getActivityEnrichments();
+      const merged = { ...localEnrichments, ...serverData.activityEnrichments };
+      await set(ACTIVITY_ENRICHMENTS_KEY, merged);
+    }
+
+    await set(LAST_SYNC_KEY, Date.now());
+    return true;
+  } catch (error) {
+    console.warn('Failed to pull from server:', error);
+    return false;
+  }
 }
 
 // Push all local data to server (initial sync)
