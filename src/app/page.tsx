@@ -6,19 +6,72 @@ import DayCard from '@/components/DayCard';
 import BottomNav from '@/components/BottomNav';
 import OfflineIndicator from '@/components/OfflineIndicator';
 import SyncButton from '@/components/SyncButton';
-import { getTripDays, tripDates } from '@/lib/tripData';
-import { getVisitedState, VisitedState } from '@/lib/storage';
+import MapView, { locationsToMarkers, accommodationToMarker, MapMarker } from '@/components/MapView';
+import { getTripDays, tripDates, Location } from '@/lib/tripData';
+import { getVisitedState, VisitedState, getDayPlans, getCustomActivities, DayPlan, CustomActivity } from '@/lib/storage';
 
 export default function Home() {
   const [visitedState, setVisitedState] = useState<VisitedState>({});
+  const [dayPlans, setDayPlans] = useState<Record<string, DayPlan>>({});
+  const [customActivities, setCustomActivities] = useState<CustomActivity[]>([]);
+  const [tripMarkers, setTripMarkers] = useState<MapMarker[]>([]);
+  const [totalActivitiesCount, setTotalActivitiesCount] = useState(0);
   const tripDays = getTripDays();
 
   useEffect(() => {
-    async function loadVisited() {
-      const state = await getVisitedState();
-      setVisitedState(state);
+    async function loadData() {
+      const [visited, plans, customs] = await Promise.all([
+        getVisitedState(),
+        getDayPlans(),
+        getCustomActivities(),
+      ]);
+      setVisitedState(visited);
+      setDayPlans(plans);
+      setCustomActivities(customs);
+
+      // Build markers in chronological order: day activities → hotel → next day...
+      const markers: MapMarker[] = [];
+      const seenIds = new Set<string>();
+      let activityCount = 0;
+
+      for (const day of tripDays) {
+        const plan = plans[day.date];
+        const dayActivities: Location[] = [];
+
+        if (plan && plan.orderedActivities.length > 0) {
+          // Use saved plan order
+          for (const id of plan.orderedActivities) {
+            if (seenIds.has(id)) continue;
+            seenIds.add(id);
+            const activity = day.activities.find(a => a.id === id) ||
+                           customs.find(a => a.id === id);
+            if (activity) {
+              dayActivities.push(activity);
+            }
+          }
+        } else {
+          // Use default activities
+          for (const activity of day.activities) {
+            if (seenIds.has(activity.id)) continue;
+            seenIds.add(activity.id);
+            dayActivities.push(activity);
+          }
+        }
+
+        // Add this day's activities (green)
+        markers.push(...locationsToMarkers(dayActivities, 'green'));
+        activityCount += dayActivities.length;
+
+        // Add this day's hotel (purple) - after activities
+        if (day.accommodation) {
+          markers.push(accommodationToMarker(day.accommodation, 'purple'));
+        }
+      }
+
+      setTripMarkers(markers);
+      setTotalActivitiesCount(activityCount);
     }
-    loadVisited();
+    loadData();
   }, []);
 
   // Determine current day
@@ -41,10 +94,28 @@ export default function Home() {
 
   const currentDayIndex = getCurrentDayIndex();
 
-  // Calculate stats
-  const totalActivities = tripDays.reduce((sum, day) => sum + day.activities.length, 0);
+  // Calculate stats - use planned activities count
+  const totalActivities = totalActivitiesCount || tripDays.reduce((sum, day) => sum + day.activities.length, 0);
   const visitedCount = Object.values(visitedState).filter(Boolean).length;
   const daysRemaining = Math.max(0, tripDates.length - currentDayIndex);
+
+  // Helper to get activity count for a day from saved plan
+  const getDayActivityCount = (date: string, defaultActivities: Location[]) => {
+    const plan = dayPlans[date];
+    if (plan && plan.orderedActivities.length > 0) {
+      return plan.orderedActivities.length;
+    }
+    return defaultActivities.length;
+  };
+
+  // Helper to get visited count for a day from saved plan
+  const getDayVisitedCount = (date: string, defaultActivities: Location[]) => {
+    const plan = dayPlans[date];
+    const activityIds = plan && plan.orderedActivities.length > 0
+      ? plan.orderedActivities
+      : defaultActivities.map(a => a.id);
+    return activityIds.filter(id => visitedState[id]).length;
+  };
 
   return (
     <main>
@@ -94,25 +165,28 @@ export default function Home() {
             </div>
           </div>
 
+          {/* Trip Map Overview */}
+          <div className="mb-6">
+            <MapView
+              title="Trip Map"
+              markers={tripMarkers}
+              height="250px"
+            />
+          </div>
+
           {/* Calendar Grid */}
           <h3 className="text-lg font-semibold mb-3 text-[var(--cream)]">Daily Schedule</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {tripDays.map((day, index) => {
-              const dayVisitedCount = day.activities.filter(
-                (a) => visitedState[a.id]
-              ).length;
-
-              return (
-                <DayCard
-                  key={day.date}
-                  day={day}
-                  isCurrentDay={index === currentDayIndex}
-                  isPast={index < currentDayIndex}
-                  visitedCount={dayVisitedCount}
-                  totalActivities={day.activities.length}
-                />
-              );
-            })}
+            {tripDays.map((day, index) => (
+              <DayCard
+                key={day.date}
+                day={day}
+                isCurrentDay={index === currentDayIndex}
+                isPast={index < currentDayIndex}
+                visitedCount={getDayVisitedCount(day.date, day.activities)}
+                totalActivities={getDayActivityCount(day.date, day.activities)}
+              />
+            ))}
           </div>
 
           {/* Quick Links */}

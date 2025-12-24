@@ -6,7 +6,8 @@ import ActivityCard from '@/components/ActivityCard';
 import WeatherWidget from '@/components/WeatherWidget';
 import BottomNav from '@/components/BottomNav';
 import OfflineIndicator from '@/components/OfflineIndicator';
-import { getTripDays, tripDates, Location } from '@/lib/tripData';
+import MapView, { locationsToMarkers, accommodationToMarker } from '@/components/MapView';
+import { getTripDays, tripDates, Location, accommodations } from '@/lib/tripData';
 import AccommodationCard from '@/components/AccommodationCard';
 import { getVisitedState, getNotesState, VisitedState, NotesState, getDayPlans, getCustomActivities } from '@/lib/storage';
 
@@ -172,6 +173,43 @@ export default function DayPage({ params }: DayPageProps) {
           <div className="mb-6">
             <WeatherWidget date={date} />
           </div>
+
+          {/* Day Map with hotels */}
+          {!isLoading && (
+            <div className="mb-6">
+              <MapView
+                title="Day Map"
+                markers={(() => {
+                  const markers = [];
+
+                  // Add previous night's hotel (orange)
+                  if (prevDay) {
+                    const prevAccommodation = accommodations.find(a => a.date === prevDay.date);
+                    if (prevAccommodation) {
+                      markers.push({
+                        ...accommodationToMarker(prevAccommodation, 'orange'),
+                        label: `Night Before: ${prevAccommodation.hotelName}`,
+                      });
+                    }
+                  }
+
+                  // Add day's activities (green)
+                  markers.push(...locationsToMarkers(orderedActivities, 'green'));
+
+                  // Add tonight's hotel (purple)
+                  if (day.accommodation) {
+                    markers.push({
+                      ...accommodationToMarker(day.accommodation, 'purple'),
+                      label: `Tonight: ${day.accommodation.hotelName}`,
+                    });
+                  }
+
+                  return markers;
+                })()}
+                height="220px"
+              />
+            </div>
+          )}
 
           {/* Activities */}
           <div className="space-y-3 mb-6">

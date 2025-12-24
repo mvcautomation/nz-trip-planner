@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Location, getDriveTime } from '@/lib/tripData';
-import { getGoogleMapsDirectionsUrl, formatDriveTime } from '@/lib/maps';
+import { getGoogleMapsDirectionsUrl, formatDriveTime, fetchDriveTime } from '@/lib/maps';
 import { toggleVisited, setNote } from '@/lib/storage';
 
 interface ActivityCardProps {
@@ -24,10 +24,32 @@ export default function ActivityCard({
 }: ActivityCardProps) {
   const [showNotes, setShowNotes] = useState(false);
   const [localNote, setLocalNote] = useState(note || '');
+  const [driveTime, setDriveTime] = useState<number | null>(null);
 
-  const driveTime = previousActivity
-    ? getDriveTime(previousActivity.id, activity.id)
-    : null;
+  // First try hardcoded drive time, then fetch from API if not available
+  useEffect(() => {
+    if (!previousActivity) {
+      setDriveTime(null);
+      return;
+    }
+
+    // Try hardcoded first
+    const hardcoded = getDriveTime(previousActivity.id, activity.id);
+    if (hardcoded) {
+      setDriveTime(hardcoded);
+      return;
+    }
+
+    // Fetch from Google Maps API
+    fetchDriveTime(
+      previousActivity.lat,
+      previousActivity.lng,
+      activity.lat,
+      activity.lng
+    ).then((time) => {
+      if (time) setDriveTime(time);
+    });
+  }, [previousActivity, activity]);
 
   const handleCheckbox = async () => {
     const newValue = await toggleVisited(activity.id);

@@ -272,5 +272,54 @@ export const driveTimes: Record<string, Record<string, number>> = {
 };
 
 export function getDriveTime(fromId: string, toId: string): number | null {
-  return driveTimes[fromId]?.[toId] || null;
+  // Check both directions since drive times are roughly symmetric
+  return driveTimes[fromId]?.[toId] || driveTimes[toId]?.[fromId] || null;
+}
+
+// Calculate straight-line distance between two coordinates in km (Haversine formula)
+function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371; // Earth's radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+// Estimate drive time based on coordinates (uses straight-line distance with road factor)
+// Returns minutes. NZ roads are winding, so we use ~50km/h average speed
+export function estimateDriveTime(fromLat: number, fromLng: number, toLat: number, toLng: number): number {
+  const distance = haversineDistance(fromLat, fromLng, toLat, toLng);
+  // NZ roads: multiply straight-line by 1.4 for winding roads, assume 50km/h average
+  const roadDistance = distance * 1.4;
+  const timeHours = roadDistance / 50;
+  return Math.round(timeHours * 60); // Convert to minutes
+}
+
+// Get drive time by ID (tries hardcoded first, then estimates from coordinates)
+export function getDriveTimeByIds(fromId: string, toId: string): number | null {
+  // First try hardcoded times
+  const hardcoded = getDriveTime(fromId, toId);
+  if (hardcoded) return hardcoded;
+
+  // Otherwise estimate from coordinates
+  const fromLoc = locations.find(l => l.id === fromId) || accommodations.find(a => a.id === fromId);
+  const toLoc = locations.find(l => l.id === toId) || accommodations.find(a => a.id === toId);
+
+  if (fromLoc && toLoc) {
+    return estimateDriveTime(fromLoc.lat, fromLoc.lng, toLoc.lat, toLoc.lng);
+  }
+
+  return null;
+}
+
+// Get drive time using coordinates directly (for custom activities)
+export function getDriveTimeByCoords(
+  fromLat: number, fromLng: number,
+  toLat: number, toLng: number
+): number {
+  return estimateDriveTime(fromLat, fromLng, toLat, toLng);
 }
