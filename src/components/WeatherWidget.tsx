@@ -56,23 +56,31 @@ export default function WeatherWidget({ date }: WeatherWidgetProps) {
     return null;
   }
 
+  const maxF = Math.round(dayWeather.maxTemp * 9/5 + 32);
+  const minF = Math.round(dayWeather.minTemp * 9/5 + 32);
+
   return (
-    <div className="bg-gradient-to-br from-blue-900/30 to-purple-900/30 rounded-lg p-3 border border-blue-500/20">
+    <div className="weather-widget">
       <div className="flex items-center gap-3">
         <span className="text-3xl" role="img" aria-label={getWeatherDescription(dayWeather.weatherCode)}>
           {getWeatherEmoji(dayWeather.weatherCode)}
         </span>
         <div>
-          <p className="text-xs text-gray-400">{getWeatherDescription(dayWeather.weatherCode)}</p>
-          <p className="font-semibold">
-            {dayWeather.maxTemp}° / {dayWeather.minTemp}°C
+          <p className="text-xs text-gold-light opacity-80">{getWeatherDescription(dayWeather.weatherCode)}</p>
+          <p className="font-semibold text-cream">
+            {maxF}° / {minF}°F
             <span className="text-xs text-gray-500 ml-1">
-              ({Math.round(dayWeather.maxTemp * 9/5 + 32)}°/{Math.round(dayWeather.minTemp * 9/5 + 32)}°F)
+              ({dayWeather.maxTemp}°/{dayWeather.minTemp}°C)
             </span>
           </p>
           {dayWeather.precipitationChance > 20 && (
-            <p className="text-xs text-blue-300">
-              💧 {dayWeather.precipitationChance}% rain
+            <p className="text-xs text-gold-light">
+              💧 {dayWeather.precipitationChance}%
+              {dayWeather.precipitationMm && dayWeather.precipitationMm > 0 && (
+                <span className="ml-1">
+                  ({(dayWeather.precipitationMm / 25.4).toFixed(2)}&quot;)
+                </span>
+              )}
             </p>
           )}
         </div>

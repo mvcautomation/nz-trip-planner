@@ -52,7 +52,7 @@ export async function fetchWeather(forceRefresh = false): Promise<WeatherData | 
     const lng = 171.5;
 
     const response = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Pacific%2FAuckland&forecast_days=14`
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum&timezone=Pacific%2FAuckland&forecast_days=14`
     );
 
     if (!response.ok) {
@@ -67,6 +67,7 @@ export async function fetchWeather(forceRefresh = false): Promise<WeatherData | 
         maxTemp: Math.round(data.daily.temperature_2m_max[i]),
         minTemp: Math.round(data.daily.temperature_2m_min[i]),
         precipitationChance: data.daily.precipitation_probability_max[i],
+        precipitationMm: data.daily.precipitation_sum[i] || 0,
         weatherCode: data.daily.weather_code[i],
       })),
     };

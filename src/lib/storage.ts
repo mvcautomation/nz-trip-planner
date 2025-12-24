@@ -108,6 +108,7 @@ export interface WeatherData {
     maxTemp: number;
     minTemp: number;
     precipitationChance: number;
+    precipitationMm?: number;
     weatherCode: number;
   }[];
 }
