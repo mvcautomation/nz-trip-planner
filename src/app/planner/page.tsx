@@ -318,8 +318,6 @@ function PlannerContent() {
   const handleTouchMove = (e: React.TouchEvent) => {
     if (draggedIndex === null || !listContainerRef.current) return;
 
-    e.preventDefault(); // Prevent scrolling while dragging
-
     const touch = e.touches[0];
     touchCurrentY.current = touch.clientY;
 
