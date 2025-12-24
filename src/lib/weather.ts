@@ -42,7 +42,12 @@ export async function fetchWeather(forceRefresh = false): Promise<WeatherData | 
   if (!forceRefresh) {
     const cached = await getCachedWeather();
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-      return cached.data;
+      // Check if cache has precipitationMm field (added later) - if not, force refresh
+      const hasNewFields = cached.data.daily[0]?.precipitationMm !== undefined;
+      if (hasNewFields) {
+        return cached.data;
+      }
+      // Cache is missing new fields, continue to fetch fresh data
     }
   }
 

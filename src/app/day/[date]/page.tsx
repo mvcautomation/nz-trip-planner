@@ -185,7 +185,6 @@ export default function DayPage({ params }: DayPageProps) {
           {!isLoading && (
             <div className="mb-6">
               <MapView
-                title="Day Map"
                 markers={(() => {
                   const markers = [];
 

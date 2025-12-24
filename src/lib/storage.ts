@@ -121,6 +121,10 @@ export async function setCachedWeather(data: WeatherData): Promise<void> {
   await set(WEATHER_CACHE_KEY, { data, timestamp: Date.now() });
 }
 
+export async function clearWeatherCache(): Promise<void> {
+  await del(WEATHER_CACHE_KEY);
+}
+
 // Custom activities
 export async function getCustomActivities(): Promise<CustomActivity[]> {
   return (await get(CUSTOM_ACTIVITIES_KEY)) || [];

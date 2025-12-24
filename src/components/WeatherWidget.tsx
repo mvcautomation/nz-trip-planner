@@ -59,8 +59,8 @@ export default function WeatherWidget({ date }: WeatherWidgetProps) {
   const maxF = Math.round(dayWeather.maxTemp * 9/5 + 32);
   const minF = Math.round(dayWeather.minTemp * 9/5 + 32);
 
-  // Convert mm to inches
-  const precipInches = dayWeather.precipitationMm ? (dayWeather.precipitationMm / 25.4).toFixed(2) : null;
+  // Convert mm to inches (always show, even if 0)
+  const precipInches = ((dayWeather.precipitationMm || 0) / 25.4).toFixed(2);
 
   return (
     <div className="bg-white/5 rounded-lg p-3 border border-white/10">
@@ -78,10 +78,7 @@ export default function WeatherWidget({ date }: WeatherWidgetProps) {
           </p>
           {dayWeather.precipitationChance > 20 && (
             <p className="text-xs text-blue-300">
-              💧 {dayWeather.precipitationChance}%
-              {precipInches && parseFloat(precipInches) > 0 && (
-                <span className="ml-1">({precipInches}&quot;)</span>
-              )}
+              💧 {dayWeather.precipitationChance}% ({precipInches}&quot;)
             </p>
           )}
         </div>
