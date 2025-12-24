@@ -148,14 +148,8 @@ export default function DayPage({ params }: DayPageProps) {
             </Link>
           </div>
 
-          {/* Tolkien Quote */}
-          <div className="tolkien-quote mb-6">
-            <p className="quote-text">"{tolkienQuotes[dayIndex % tolkienQuotes.length].quote}"</p>
-            <p className="quote-source">— J.R.R. Tolkien, {tolkienQuotes[dayIndex % tolkienQuotes.length].source}</p>
-          </div>
-
           {/* Day navigation */}
-          <div className="flex justify-between mb-6">
+          <div className="flex justify-between mb-4">
             {prevDay ? (
               <Link
                 href={`/day/${encodeURIComponent(prevDay.date)}`}
@@ -174,6 +168,12 @@ export default function DayPage({ params }: DayPageProps) {
                 {nextDay.dateLabel.split(',')[1]} →
               </Link>
             )}
+          </div>
+
+          {/* Tolkien Quote */}
+          <div className="tolkien-quote mb-6">
+            <p className="quote-text">"{tolkienQuotes[dayIndex % tolkienQuotes.length].quote}"</p>
+            <p className="quote-source">— J.R.R. Tolkien, {tolkienQuotes[dayIndex % tolkienQuotes.length].source}</p>
           </div>
 
           {/* Weather */}
