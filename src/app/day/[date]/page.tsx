@@ -9,7 +9,7 @@ import OfflineIndicator from '@/components/OfflineIndicator';
 import MapView, { locationsToMarkers, accommodationToMarker } from '@/components/MapView';
 import { getTripDays, tripDates, Location, accommodations } from '@/lib/tripData';
 import AccommodationCard from '@/components/AccommodationCard';
-import { getVisitedState, getNotesState, VisitedState, NotesState, getDayPlans, getCustomActivities, pullFromServer } from '@/lib/storage';
+import { getVisitedState, getNotesState, VisitedState, NotesState, getDayPlans, getCustomActivities } from '@/lib/storage';
 
 // Tolkien quotes for each day - themed for travel and adventure
 const tolkienQuotes = [
@@ -46,9 +46,6 @@ export default function DayPage({ params }: DayPageProps) {
 
   useEffect(() => {
     async function loadState() {
-      // Pull latest from server first (silent sync)
-      await pullFromServer();
-
       const [visited, notes, plans, customActivities] = await Promise.all([
         getVisitedState(),
         getNotesState(),
