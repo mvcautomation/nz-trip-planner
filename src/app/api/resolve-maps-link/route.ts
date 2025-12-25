@@ -65,21 +65,51 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    if (lat === null || lng === null) {
-      return NextResponse.json({
-        error: 'Could not find coordinates in the resolved URL',
-        resolvedUrl
-      }, { status: 400 });
+    // Pattern 5: ftid format with coordinates embedded (mobile share links)
+    if (lat === null) {
+      const ftidMatch = resolvedUrl.match(/!8m2!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+      if (ftidMatch) {
+        lat = parseFloat(ftidMatch[1]);
+        lng = parseFloat(ftidMatch[2]);
+      }
+    }
+
+    // Pattern 6: data= section coordinates
+    if (lat === null) {
+      const dataMatch = resolvedUrl.match(/data=.*?!3d(-?\d+\.\d+).*?!4d(-?\d+\.\d+)/);
+      if (dataMatch) {
+        lat = parseFloat(dataMatch[1]);
+        lng = parseFloat(dataMatch[2]);
+      }
     }
 
     // Try to extract place name from URL
-    const placeMatch = resolvedUrl.match(/\/place\/([^/@]+)/);
     let name = 'Custom Location';
+    let address: string | undefined;
+
+    // Pattern: /place/Name
+    const placeMatch = resolvedUrl.match(/\/place\/([^/@]+)/);
     if (placeMatch) {
       name = decodeURIComponent(placeMatch[1].replace(/\+/g, ' '));
     }
 
-    return NextResponse.json({ name, lat, lng, resolvedUrl });
+    // Pattern: ?q=Name+Address (mobile share links)
+    const qMatch = resolvedUrl.match(/[?&]q=([^&]+)/);
+    if (qMatch) {
+      const fullPlace = decodeURIComponent(qMatch[1].replace(/\+/g, ' '));
+      const parts = fullPlace.split(',');
+      name = parts[0].trim();
+      if (parts.length > 1) {
+        address = parts.slice(1).join(',').trim();
+      }
+    }
+
+    // If we still don't have coordinates, that's okay - return name/address for search
+    if (lat === null || lng === null) {
+      return NextResponse.json({ name, address, resolvedUrl, needsGeocode: true });
+    }
+
+    return NextResponse.json({ name, lat, lng, address, resolvedUrl });
   } catch (error) {
     console.error('Error resolving maps link:', error);
     return NextResponse.json({ error: 'Failed to resolve the link' }, { status: 500 });

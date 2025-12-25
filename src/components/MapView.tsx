@@ -329,17 +329,19 @@ export default function MapView({ markers, title, className = '', height = '300p
   );
 }
 
-// Helper function to convert locations to markers
+// Helper function to convert locations to markers (filters out locations without coordinates)
 export function locationsToMarkers(
-  locations: (Location | { id: string; name: string; lat: number; lng: number; category?: string })[],
+  locations: (Location | { id: string; name: string; lat?: number; lng?: number; category?: string })[],
   color: 'red' | 'green' | 'blue' | 'purple' | 'orange' = 'green'
 ): MapMarker[] {
-  return locations.map(loc => ({
-    lat: loc.lat,
-    lng: loc.lng,
-    label: loc.name,
-    color,
-  }));
+  return locations
+    .filter(loc => loc.lat !== undefined && loc.lng !== undefined)
+    .map(loc => ({
+      lat: loc.lat!,
+      lng: loc.lng!,
+      label: loc.name,
+      color,
+    }));
 }
 
 // Helper function to convert accommodation to marker

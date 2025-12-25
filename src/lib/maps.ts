@@ -1,9 +1,19 @@
-export function getGoogleMapsDirectionsUrl(lat: number, lng: number): string {
-  return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+export function getGoogleMapsDirectionsUrl(lat?: number, lng?: number, name?: string, address?: string): string {
+  if (lat && lng) {
+    return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+  }
+  // Fall back to searching by name/address
+  const query = address || name || '';
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(query)}`;
 }
 
-export function getGoogleMapsUrl(lat: number, lng: number): string {
-  return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+export function getGoogleMapsSearchUrl(lat?: number, lng?: number, name?: string, address?: string): string {
+  if (lat && lng) {
+    return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+  }
+  // Fall back to searching by name/address
+  const query = address || name || '';
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
 }
 
 export function formatDriveTime(minutes: number): string {

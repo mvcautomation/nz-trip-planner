@@ -146,7 +146,7 @@ function PlannerContent() {
   };
 
   // Parse Google Maps share link to extract place info
-  const parseGoogleMapsLink = async (link: string): Promise<{ name: string; lat: number; lng: number; address?: string } | null> => {
+  const parseGoogleMapsLink = async (link: string): Promise<{ name: string; lat?: number; lng?: number; address?: string } | null> => {
     try {
       let url = link.trim();
 
@@ -166,7 +166,7 @@ function PlannerContent() {
           }
 
           const data = await response.json();
-          return { name: data.name, lat: data.lat, lng: data.lng };
+          return { name: data.name, lat: data.lat, lng: data.lng, address: data.address };
         } catch {
           setMapsLinkError('Failed to process the link. Please try again.');
           return null;
@@ -177,19 +177,25 @@ function PlannerContent() {
       // Extract coordinates from URL
       // Format: /place/Name/@-lat,lng,zoom or just @lat,lng
       const pathMatch = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-      if (!pathMatch) {
-        setMapsLinkError('Could not find coordinates in the link. Please try copying the URL again.');
-        return null;
-      }
+      let lat: number | undefined;
+      let lng: number | undefined;
 
-      const lat = parseFloat(pathMatch[1]);
-      const lng = parseFloat(pathMatch[2]);
+      if (pathMatch) {
+        lat = parseFloat(pathMatch[1]);
+        lng = parseFloat(pathMatch[2]);
+      }
 
       // Try to extract place name from URL
       const placeMatch = url.match(/\/place\/([^/@]+)/);
       let name = 'Custom Location';
       if (placeMatch) {
         name = decodeURIComponent(placeMatch[1].replace(/\+/g, ' '));
+      }
+
+      // Need at least a name
+      if (name === 'Custom Location' && !lat) {
+        setMapsLinkError('Could not extract location info. Please try copying the URL again.');
+        return null;
       }
 
       return { name, lat, lng };

@@ -21,7 +21,7 @@ export default function DayCard({
   const statusClass = isCurrentDay ? 'current' : isPast ? 'past' : '';
 
   return (
-    <Link href={`/day/${encodeURIComponent(day.date)}`}>
+    <Link href={`/day/${day.date.replace('/', '-')}`}>
       <div className={`day-card ${statusClass}`}>
         <div className="flex justify-between items-start mb-2">
           <div>

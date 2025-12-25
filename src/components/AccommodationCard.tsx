@@ -31,15 +31,17 @@ export default function AccommodationCard({
       return;
     }
 
-    // Fetch from Google Maps API
-    fetchDriveTime(
-      lastActivity.lat,
-      lastActivity.lng,
-      accommodation.lat,
-      accommodation.lng
-    ).then((time) => {
-      if (time) setDriveTime(time);
-    });
+    // Fetch from Google Maps API (only if both have coordinates)
+    if (lastActivity.lat && lastActivity.lng) {
+      fetchDriveTime(
+        lastActivity.lat,
+        lastActivity.lng,
+        accommodation.lat,
+        accommodation.lng
+      ).then((time) => {
+        if (time) setDriveTime(time);
+      });
+    }
   }, [lastActivity, accommodation]);
 
   const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(accommodation.address)}`;

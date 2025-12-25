@@ -32,7 +32,8 @@ interface DayPageProps {
 
 export default function DayPage({ params }: DayPageProps) {
   const resolvedParams = use(params);
-  const date = decodeURIComponent(resolvedParams.date);
+  // Convert URL format (12-30) back to date format (12/30)
+  const date = resolvedParams.date.replace('-', '/');
   const [visitedState, setVisitedState] = useState<VisitedState>({});
   const [notesState, setNotesState] = useState<NotesState>({});
   const [orderedActivities, setOrderedActivities] = useState<Location[]>([]);
@@ -152,7 +153,7 @@ export default function DayPage({ params }: DayPageProps) {
           <div className="flex justify-between mb-4">
             {prevDay ? (
               <Link
-                href={`/day/${encodeURIComponent(prevDay.date)}`}
+                href={`/day/${prevDay.date.replace('/', '-')}`}
                 className="text-sm text-gray-400 hover:text-white transition-colors"
               >
                 ← {prevDay.dateLabel.split(',')[1]}
@@ -162,7 +163,7 @@ export default function DayPage({ params }: DayPageProps) {
             )}
             {nextDay && (
               <Link
-                href={`/day/${encodeURIComponent(nextDay.date)}`}
+                href={`/day/${nextDay.date.replace('/', '-')}`}
                 className="text-sm text-gray-400 hover:text-white transition-colors"
               >
                 {nextDay.dateLabel.split(',')[1]} →

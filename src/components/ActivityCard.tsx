@@ -40,15 +40,17 @@ export default function ActivityCard({
       return;
     }
 
-    // Fetch from Google Maps API
-    fetchDriveTime(
-      previousActivity.lat,
-      previousActivity.lng,
-      activity.lat,
-      activity.lng
-    ).then((time) => {
-      if (time) setDriveTime(time);
-    });
+    // Fetch from Google Maps API (only if both have coordinates)
+    if (previousActivity.lat && previousActivity.lng && activity.lat && activity.lng) {
+      fetchDriveTime(
+        previousActivity.lat,
+        previousActivity.lng,
+        activity.lat,
+        activity.lng
+      ).then((time) => {
+        if (time) setDriveTime(time);
+      });
+    }
   }, [previousActivity, activity]);
 
   const handleCheckbox = async () => {
@@ -93,7 +95,7 @@ export default function ActivityCard({
 
           <div className="flex flex-wrap gap-2 mt-2">
             <a
-              href={getGoogleMapsDirectionsUrl(activity.lat, activity.lng)}
+              href={getGoogleMapsDirectionsUrl(activity.lat, activity.lng, activity.name, activity.address)}
               target="_blank"
               rel="noopener noreferrer"
               className="nav-btn text-xs"

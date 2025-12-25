@@ -30,8 +30,8 @@ const SYNC_SERVER_URL = 'https://webhooks.ai-app.space/nz-trip/sync';
 export interface CustomActivity {
   id: string;
   name: string;
-  lat: number;
-  lng: number;
+  lat?: number;
+  lng?: number;
   date: string;  // The trip date it was added to
   category: 'custom';  // Mark as custom type
   address?: string;

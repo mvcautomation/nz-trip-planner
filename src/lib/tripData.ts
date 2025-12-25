@@ -2,8 +2,8 @@ export interface Location {
   id: string;
   name: string;
   date: string;
-  lat: number;
-  lng: number;
+  lat?: number;
+  lng?: number;
   category: 'activity' | 'stay' | 'possible' | 'custom';
   address?: string;
   bookingRef?: string;
@@ -309,7 +309,7 @@ export function getDriveTimeByIds(fromId: string, toId: string): number | null {
   const fromLoc = locations.find(l => l.id === fromId) || accommodations.find(a => a.id === fromId);
   const toLoc = locations.find(l => l.id === toId) || accommodations.find(a => a.id === toId);
 
-  if (fromLoc && toLoc) {
+  if (fromLoc && toLoc && fromLoc.lat && fromLoc.lng && toLoc.lat && toLoc.lng) {
     return estimateDriveTime(fromLoc.lat, fromLoc.lng, toLoc.lat, toLoc.lng);
   }
 
