@@ -39,6 +39,7 @@ export default function DayPage({ params }: DayPageProps) {
   const [notesState, setNotesState] = useState<NotesState>({});
   const [orderedActivities, setOrderedActivities] = useState<Location[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentTime, setCurrentTime] = useState<Date>(new Date());
   const hasSynced = useRef(false);
 
   const tripDays = getTripDays();
@@ -46,6 +47,12 @@ export default function DayPage({ params }: DayPageProps) {
   const day = tripDays[dayIndex];
   const prevDay = dayIndex > 0 ? tripDays[dayIndex - 1] : null;
   const nextDay = dayIndex < tripDays.length - 1 ? tripDays[dayIndex + 1] : null;
+
+  // Update clock every minute
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     async function loadState() {
@@ -123,6 +130,22 @@ export default function DayPage({ params }: DayPageProps) {
     setNotesState((prev) => ({ ...prev, [id]: note }));
   };
 
+  // Format time for NZ (NZDT = UTC+13)
+  const nzTime = currentTime.toLocaleTimeString('en-NZ', {
+    timeZone: 'Pacific/Auckland',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
+
+  // Format time for Pacific (PST/PDT)
+  const pacificTime = currentTime.toLocaleTimeString('en-US', {
+    timeZone: 'America/Los_Angeles',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
+
   return (
     <main className="page-with-bg">
       <OfflineIndicator />
@@ -138,7 +161,13 @@ export default function DayPage({ params }: DayPageProps) {
             <div className="text-center">
               <h1 className="text-xl font-bold">{day.dateLabel}</h1>
               <p className="text-sm text-gray-400">
-                {day.activities.length} activities
+                {orderedActivities.length} {orderedActivities.length === 1 ? 'activity' : 'activities'}
+              </p>
+              <p className="text-sm text-gray-300 mt-1">
+                {nzTime} <span className="text-gray-500">NZ</span>
+              </p>
+              <p className="text-xs text-gray-500">
+                {pacificTime} Pacific
               </p>
             </div>
             <Link
