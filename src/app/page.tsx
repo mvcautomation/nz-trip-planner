@@ -16,6 +16,7 @@ export default function Home() {
   const [customActivities, setCustomActivities] = useState<CustomActivity[]>([]);
   const [tripMarkers, setTripMarkers] = useState<MapMarker[]>([]);
   const [totalActivitiesCount, setTotalActivitiesCount] = useState(0);
+  const [isLoaded, setIsLoaded] = useState(false);
   const tripDays = getTripDays();
   const hasSynced = useRef(false);
 
@@ -77,6 +78,7 @@ export default function Home() {
 
       setTripMarkers(markers);
       setTotalActivitiesCount(activityCount);
+      setIsLoaded(true);
     }
     loadData();
   }, []);
@@ -193,7 +195,7 @@ export default function Home() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {tripDays.map((day, index) => (
               <DayCard
-                key={day.date}
+                key={`${day.date}-${isLoaded}`}
                 day={day}
                 isCurrentDay={index === currentDayIndex}
                 isPast={index < currentDayIndex}
