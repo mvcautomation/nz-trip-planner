@@ -28,17 +28,17 @@ export function formatDriveTime(minutes: number): string {
   return `${hours}h ${mins}m`;
 }
 
-// Local memory cache for drive times (to avoid repeated server calls in same session)
+// Local memory cache for drive times (to avoid repeated calls in same session)
 const localDriveTimeCache = new Map<string, number>();
 
-// In-flight request deduplication - prevents multiple parallel requests for same route
+// In-flight request deduplication
 const pendingRequests = new Map<string, Promise<number | null>>();
 
-// Server API URL for drive time proxy (avoids CORS issues with Google Maps API)
-const API_URL = process.env.NEXT_PUBLIC_SYNC_API_URL || 'https://webhooks.ai-app.space';
+// IndexedDB cache loaded flag
+let indexedDBCacheLoaded = false;
 
-// Get drive time between two coordinates via server proxy
-// Server handles caching and Google Maps API calls
+// Get drive time between two coordinates
+// First checks memory cache, then IndexedDB (synced from server), then fetches from server if needed
 export async function fetchDriveTime(
   fromLat: number,
   fromLng: number,
@@ -47,17 +47,38 @@ export async function fetchDriveTime(
 ): Promise<number | null> {
   const routeKey = `${fromLat},${fromLng}->${toLat},${toLng}`;
 
-  // Check local memory cache first (for same-session speed)
+  // Check local memory cache first
   if (localDriveTimeCache.has(routeKey)) {
     return localDriveTimeCache.get(routeKey)!;
   }
 
-  // Check if there's already a pending request for this route (deduplication)
+  // Load IndexedDB cache once into memory
+  if (!indexedDBCacheLoaded) {
+    indexedDBCacheLoaded = true;
+    try {
+      const { getCachedDriveTimes } = await import('./storage');
+      const cachedTimes = await getCachedDriveTimes();
+      for (const [key, value] of Object.entries(cachedTimes)) {
+        localDriveTimeCache.set(key, value);
+      }
+    } catch (e) {
+      console.warn('Failed to load cached drive times:', e);
+    }
+  }
+
+  // Check memory cache again after loading IndexedDB
+  if (localDriveTimeCache.has(routeKey)) {
+    return localDriveTimeCache.get(routeKey)!;
+  }
+
+  // Check if there's already a pending request for this route
   if (pendingRequests.has(routeKey)) {
     return pendingRequests.get(routeKey)!;
   }
 
-  // Create the request promise
+  // Not in cache - fetch from server (which will call Google API if needed)
+  const API_URL = process.env.NEXT_PUBLIC_SYNC_API_URL || 'https://webhooks.ai-app.space';
+
   const requestPromise = (async (): Promise<number | null> => {
     try {
       const response = await fetch(`${API_URL}/nz-trip/sync`, {
@@ -71,24 +92,19 @@ export async function fetchDriveTime(
       const result = await response.json();
 
       if (result.success && result.driveTime !== null) {
-        // Cache locally for this session
         localDriveTimeCache.set(routeKey, result.driveTime);
         return result.driveTime;
       }
 
-      console.warn('Server drive time fetch failed:', result.error);
       return null;
     } catch (error) {
       console.error('Failed to fetch drive time:', error);
       return null;
     } finally {
-      // Clean up pending request after completion
       pendingRequests.delete(routeKey);
     }
   })();
 
-  // Store the pending request for deduplication
   pendingRequests.set(routeKey, requestPromise);
-
   return requestPromise;
 }

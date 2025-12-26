@@ -20,6 +20,7 @@ const DAY_PLANS_KEY = 'nz-trip-day-plans';
 const WEATHER_CACHE_KEY = 'nz-trip-weather-cache';
 const CUSTOM_ACTIVITIES_KEY = 'nz-trip-custom-activities';
 const ACTIVITY_ENRICHMENTS_KEY = 'nz-trip-activity-enrichments';
+const DRIVE_TIMES_KEY = 'nz-trip-drive-times';
 const LAST_SYNC_KEY = 'nz-trip-last-sync';
 
 // Sync server URL - uses webhook server for cross-device sync
@@ -170,6 +171,11 @@ export async function setActivityEnrichment(activityId: string, enrichment: Acti
   syncToServer('setActivityEnrichment', { activityId, enrichment });
 }
 
+// Drive times cache (synced from server, keyed by "lat,lng->lat,lng")
+export async function getCachedDriveTimes(): Promise<Record<string, number>> {
+  return (await get(DRIVE_TIMES_KEY)) || {};
+}
+
 // Clear all data
 export async function clearAllData(): Promise<void> {
   await del(VISITED_KEY);
@@ -241,6 +247,11 @@ export async function pullFromServer(): Promise<boolean> {
         const localEnrichments = await getActivityEnrichments();
         const merged = { ...localEnrichments, ...serverData.activityEnrichments };
         await set(ACTIVITY_ENRICHMENTS_KEY, merged);
+      }
+
+      // Store cached drive times from server
+      if (serverData.driveTimes && Object.keys(serverData.driveTimes).length > 0) {
+        await set(DRIVE_TIMES_KEY, serverData.driveTimes);
       }
 
       await set(LAST_SYNC_KEY, Date.now());
