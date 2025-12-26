@@ -326,10 +326,10 @@ body {
 .bottom-nav-container::after {
   content: "";
   position: absolute;
-  bottom: 0;
+  bottom: -50px; /* Extend below to cover gap when browser UI hides */
   left: 0;
   right: 0;
-  height: env(safe-area-inset-bottom, 0px);
+  height: calc(50px + env(safe-area-inset-bottom, 0px));
   background: var(--brown-dark);
   z-index: -1;
 }
