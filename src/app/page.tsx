@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import HeroSection from '@/components/hero/HeroSection';
 import DayCard from '@/components/DayCard';
 import BottomNav from '@/components/BottomNav';
@@ -8,7 +8,7 @@ import OfflineIndicator from '@/components/OfflineIndicator';
 import SyncButton from '@/components/SyncButton';
 import MapView, { locationsToMarkers, accommodationToMarker, MapMarker } from '@/components/MapView';
 import { getTripDays, tripDates, Location } from '@/lib/tripData';
-import { getVisitedState, VisitedState, getDayPlans, getCustomActivities, DayPlan, CustomActivity } from '@/lib/storage';
+import { getVisitedState, VisitedState, getDayPlans, getCustomActivities, DayPlan, CustomActivity, pullFromServer } from '@/lib/storage';
 
 export default function Home() {
   const [visitedState, setVisitedState] = useState<VisitedState>({});
@@ -17,9 +17,16 @@ export default function Home() {
   const [tripMarkers, setTripMarkers] = useState<MapMarker[]>([]);
   const [totalActivitiesCount, setTotalActivitiesCount] = useState(0);
   const tripDays = getTripDays();
+  const hasSynced = useRef(false);
 
   useEffect(() => {
     async function loadData() {
+      // Sync from server once per page mount
+      if (!hasSynced.current) {
+        hasSynced.current = true;
+        await pullFromServer();
+      }
+
       const [visited, plans, customs] = await Promise.all([
         getVisitedState(),
         getDayPlans(),

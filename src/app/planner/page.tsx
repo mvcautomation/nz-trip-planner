@@ -420,7 +420,7 @@ function PlannerContent() {
 
   const viewDay = () => {
     if (selectedDate) {
-      router.push(`/day/${encodeURIComponent(selectedDate)}`);
+      router.push(`/day/${selectedDate.replace('/', '-')}`);
     }
   };
 
