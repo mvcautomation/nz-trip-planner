@@ -160,9 +160,6 @@ export default function DayPage({ params }: DayPageProps) {
             </Link>
             <div className="text-center">
               <h1 className="text-xl font-bold">{day.dateLabel}</h1>
-              <p className="text-sm text-gray-400">
-                {orderedActivities.length} {orderedActivities.length === 1 ? 'activity' : 'activities'}
-              </p>
               <p className="text-sm text-gray-300 mt-1">
                 {nzTime} <span className="text-gray-500">NZ</span>
               </p>
