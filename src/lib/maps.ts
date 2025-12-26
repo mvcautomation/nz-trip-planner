@@ -31,6 +31,9 @@ export function formatDriveTime(minutes: number): string {
 // Local memory cache for drive times (to avoid repeated server calls in same session)
 const localDriveTimeCache = new Map<string, number>();
 
+// In-flight request deduplication - prevents multiple parallel requests for same route
+const pendingRequests = new Map<string, Promise<number | null>>();
+
 // Server API URL for drive time proxy (avoids CORS issues with Google Maps API)
 const API_URL = process.env.NEXT_PUBLIC_SYNC_API_URL || 'https://webhooks.ai-app.space';
 
@@ -49,28 +52,43 @@ export async function fetchDriveTime(
     return localDriveTimeCache.get(routeKey)!;
   }
 
-  // Call server proxy (handles DB cache + Google Maps API)
-  try {
-    const response = await fetch(`${API_URL}/nz-trip/sync`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'fetchDriveTime',
-        data: { fromLat, fromLng, toLat, toLng }
-      })
-    });
-    const result = await response.json();
-
-    if (result.success && result.driveTime !== null) {
-      // Cache locally for this session
-      localDriveTimeCache.set(routeKey, result.driveTime);
-      return result.driveTime;
-    }
-
-    console.warn('Server drive time fetch failed:', result.error);
-    return null;
-  } catch (error) {
-    console.error('Failed to fetch drive time:', error);
-    return null;
+  // Check if there's already a pending request for this route (deduplication)
+  if (pendingRequests.has(routeKey)) {
+    return pendingRequests.get(routeKey)!;
   }
+
+  // Create the request promise
+  const requestPromise = (async (): Promise<number | null> => {
+    try {
+      const response = await fetch(`${API_URL}/nz-trip/sync`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'fetchDriveTime',
+          data: { fromLat, fromLng, toLat, toLng }
+        })
+      });
+      const result = await response.json();
+
+      if (result.success && result.driveTime !== null) {
+        // Cache locally for this session
+        localDriveTimeCache.set(routeKey, result.driveTime);
+        return result.driveTime;
+      }
+
+      console.warn('Server drive time fetch failed:', result.error);
+      return null;
+    } catch (error) {
+      console.error('Failed to fetch drive time:', error);
+      return null;
+    } finally {
+      // Clean up pending request after completion
+      pendingRequests.delete(routeKey);
+    }
+  })();
+
+  // Store the pending request for deduplication
+  pendingRequests.set(routeKey, requestPromise);
+
+  return requestPromise;
 }
