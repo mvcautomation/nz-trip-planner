@@ -104,7 +104,26 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // If we still don't have coordinates, that's okay - return name/address for search
+    // If we don't have coordinates, try geocoding with Nominatim (OpenStreetMap)
+    if (lat === null || lng === null) {
+      const searchQuery = address ? `${name}, ${address}` : name;
+      try {
+        const geoResponse = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=1`,
+          { headers: { 'User-Agent': 'NZ-Trip-Planner/1.0' } }
+        );
+        const geoData = await geoResponse.json();
+
+        if (geoData && geoData[0]) {
+          lat = parseFloat(geoData[0].lat);
+          lng = parseFloat(geoData[0].lon);
+        }
+      } catch (geoError) {
+        console.error('Geocoding failed:', geoError);
+      }
+    }
+
+    // If still no coordinates after geocoding, return what we have
     if (lat === null || lng === null) {
       return NextResponse.json({ name, address, resolvedUrl, needsGeocode: true });
     }
