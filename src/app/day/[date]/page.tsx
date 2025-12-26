@@ -10,6 +10,7 @@ import MapView, { locationsToMarkers, accommodationToMarker } from '@/components
 import { getTripDays, tripDates, Location, accommodations } from '@/lib/tripData';
 import AccommodationCard from '@/components/AccommodationCard';
 import { getVisitedState, getNotesState, VisitedState, NotesState, getDayPlans, getCustomActivities, pullFromServer } from '@/lib/storage';
+import { preloadDriveTimes } from '@/lib/maps';
 
 // Tolkien quotes for each day - themed for travel and adventure
 const tolkienQuotes = [
@@ -52,6 +53,8 @@ export default function DayPage({ params }: DayPageProps) {
       if (!hasSynced.current) {
         hasSynced.current = true;
         await pullFromServer();
+        // Preload drive times into memory before rendering ActivityCards
+        await preloadDriveTimes();
       }
 
       const [visited, notes, plans, customActivities] = await Promise.all([
