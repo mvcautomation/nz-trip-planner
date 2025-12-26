@@ -129,10 +129,10 @@ export async function fetchDriveTime(
       });
       const result = await response.json();
 
-      // Check if API limit was reached - stop all future requests
+      // Check if API limit was reached - stop all future requests this session
+      // Don't add to failedRoutes so it can be retried after page reload (next day)
       if (result.limitReached) {
         apiLimitReached = true;
-        failedRoutes.add(routeKey);
         return null;
       }
 
