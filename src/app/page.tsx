@@ -33,7 +33,6 @@ export default function Home() {
         getDayPlans(),
         getCustomActivities(),
       ]);
-      console.log('Loaded data:', { plans, customs, dec30Plan: plans['12/30'] });
       setVisitedState(visited);
       setDayPlans(plans);
       setCustomActivities(customs);

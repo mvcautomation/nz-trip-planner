@@ -41,7 +41,7 @@ export default function DayCard({
 
         <div className="space-y-1">
           <p className="text-sm text-gray-300">
-            {day.activities.length} {day.activities.length === 1 ? 'activity' : 'activities'}
+            {totalActivities} {totalActivities === 1 ? 'activity' : 'activities'}
           </p>
           {day.stay && (
             <p className="text-xs text-gray-400">
