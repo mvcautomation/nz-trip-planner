@@ -106,21 +106,28 @@ export default function Home() {
   const visitedCount = Object.values(visitedState).filter(Boolean).length;
   const daysRemaining = Math.max(0, tripDates.length - currentDayIndex);
 
-  // Helper to get activity count for a day from saved plan
+  // Helper to get activity count for a day (including custom activities)
   const getDayActivityCount = (date: string, defaultActivities: Location[]) => {
     const plan = dayPlans[date];
     if (plan && plan.orderedActivities.length > 0) {
       return plan.orderedActivities.length;
     }
-    return defaultActivities.length;
+    // Count default activities plus any custom activities for this day
+    const customForDay = customActivities.filter(a => a.date === date);
+    return defaultActivities.length + customForDay.length;
   };
 
-  // Helper to get visited count for a day from saved plan
+  // Helper to get visited count for a day (including custom activities)
   const getDayVisitedCount = (date: string, defaultActivities: Location[]) => {
     const plan = dayPlans[date];
-    const activityIds = plan && plan.orderedActivities.length > 0
-      ? plan.orderedActivities
-      : defaultActivities.map(a => a.id);
+    let activityIds: string[];
+    if (plan && plan.orderedActivities.length > 0) {
+      activityIds = plan.orderedActivities;
+    } else {
+      // Include default activities plus custom activities for this day
+      const customForDay = customActivities.filter(a => a.date === date);
+      activityIds = [...defaultActivities.map(a => a.id), ...customForDay.map(a => a.id)];
+    }
     return activityIds.filter(id => visitedState[id]).length;
   };
 
